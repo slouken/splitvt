@@ -17,10 +17,16 @@
 
 
 #ifdef HAVE_TERMIO_H
-#include	<termio.h>
-#else
-#include	<sys/ioctl.h>
-#endif  /* HAVE_TERMIO_H */
+# include	<termio.h>
+#elif defined(HAVE_TERMIOS_H)
+# include	<termios.h>
+# include	<sys/ioctl.h>
+# ifndef termio
+#  define termio termios
+# endif /* !termio */
+#else /* !HAVE_TERMIO_H && !HAVE_TERMIOS_H */
+# include	<sys/ioctl.h>
+#endif
 
 #ifdef HAVE_BSDTTY_H
 #include	<sys/bsdtty.h>
@@ -32,6 +38,10 @@
 #ifdef NEED_INET_H
 /*#define STTY_HACK*/
 #endif
+
+#ifndef OLCUC 
+# define OLCUC 0	/* Missing in FreeBSD, GNU/kFreeBSD */
+#endif /* !OLCUC */
 
 int tty_reset(int fd);
 
@@ -454,7 +464,7 @@ void dropctty()
 }
 
 
-#ifdef HAVE_TERMIO_H
+#if defined(HAVE_TERMIO_H) || defined(HAVE_TERMIOS_H)
 
 /* Get the modes of the controlling tty and save them.  Saves
    ttymodes in tty_mode and returns -1 if ioctl fails. */
@@ -475,7 +485,11 @@ int fd;
 	fprintf(stderr, "Getting tty modes for tty_mode.\r\n");
 #endif
 
+#ifdef HAVE_TERMIOS_H
+	if (tcgetattr(fd, &tty_mode) < 0)
+#else /* HAVE_TERMIO_H */
 	if (ioctl(fd, TCGETA, (char *) &tty_mode) < 0)
+#endif
 	{
 #ifdef DEBUG
 		perror("tty_getmode(): ioctl error");
@@ -499,7 +513,11 @@ int fd;
 
 	if ( ! tty_init )
 	{
+#ifdef HAVE_TERMIOS_H
+		if (tcgetattr(fd, &tty_mode) < 0)
+#else /* HAVE_TERMIO_H */
 		if (ioctl(fd, TCGETA, (char *) &tty_mode) < 0)
+#endif
 			return(-1);  
 	}
 
@@ -518,8 +536,12 @@ int fd;
 	temp_mode.c_cc[VINTR]=('C'^64);
 	temp_mode.c_cc[VEOF]=('D'^64);
 	
-	/* TCSETAW is important for letting tty input drain. */
+	/* TCSADRAIN/TCSETAW is important for letting tty input drain. */
+#ifdef HAVE_TERMIOS_H
+	if ( tcsetattr(fd, TCSADRAIN, &temp_mode) < 0 )
+#else /* HAVE_TERMIO_H */
 	if ( ioctl(fd, TCSETAW, (char *)&temp_mode) < 0 )
+#endif
 	{
 #ifdef DEBUG
 		perror("Can't set tty modes");
@@ -544,7 +566,11 @@ int fd;     /* of tty device */
 	if ( ! isatty(fd) )
 		return(0);
 
+#ifdef HAVE_TERMIOS_H
+	if ( tcgetattr(fd, &temp_mode) < 0 )
+#else /* HAVE_TERMIO_H */
 	if ( ioctl(fd, TCGETA, (char *)&temp_mode) < 0 )
+#endif
 		return(-1);
 
 #ifdef SEVEN_BIT
@@ -558,8 +584,12 @@ int fd;     /* of tty device */
 	temp_mode.c_cc[VMIN]=1;		/* 1 or more chars satisfy read */
 	temp_mode.c_cc[VTIME]=0;	/* 10'ths of seconds between chars */
 
-	/* TCSETAW is important for letting tty input drain. */
+	/* TCSADRAIN/TCSETAW is important for letting tty input drain. */
+#ifdef HAVE_TERMIOS_H
+	if (tcsetattr(fd, TCSADRAIN, &temp_mode) < 0)
+#else /* HAVE_TERMIO_H */
 	if (ioctl(fd, TCSETAW, (char *) &temp_mode) < 0)
+#endif
 		return(-1);
 	return(0);
 }
@@ -577,13 +607,17 @@ int fd;
 	if ( ! isatty(fd) )
 		return(0);
 
-	/* TCSETAW is important for letting tty input drain. */
+	/* TCSADRAIN/TCSETAW is important for letting tty input drain. */
+#ifdef HAVE_TERMIOS_H
+	if (tcsetattr(fd, TCSADRAIN, &tty_mode) < 0)
+#else /* HAVE_TERMIO_H */
 	if (ioctl(fd, TCSETAW, (char *) &tty_mode) < 0)
+#endif
 		return(-1);
 	return(0);
 }
 
-#else  /* no /usr/include/termio.h */
+#else  /* no /usr/include/termio{,s}.h */
 #ifdef NEED_COMPAT_H		/* FreeBSD needs this */
 #include <sys/ioctl_compat.h>
 #endif /* NEED_COMPAT_H */

@@ -201,7 +201,18 @@ char *tty;		/* /dev/ttyxx */
 		ut.ut_host[sizeof(ut.ut_host)-1]='\0';
 	}
 #endif
+#if __WORDSIZE == 64 && __WORDSIZE_COMPAT32
+	/* 'time_t' is 64-bit, 'ut.ut_time' is 32-bit. */
+	{
+		time_t now;
+
+		(void) time(&now);
+		ut.ut_time = now & 0xffffffff; /* Discard upper bits. */
+	}
+#else /* Equal size time representation. */
 	(void) time(&ut.ut_time);
+#endif
+
 
 #if !defined(SOLARIS) && !defined(IRIX) && !defined(__GLIBC__)
 	/* Solaris and Irix and GLIBC machines do this automatically */
@@ -237,7 +248,17 @@ char *tty;		/* /dev/ttyxx */
 #if defined(HAVE_UTHOST)
 		ut.ut_host[0]='\0';
 #endif
+#if __WORDSIZE == 64 && __WORDSIZE_COMPAT32
+		/* 'time_t' is 64-bit, 'ut.ut_time' is 32-bit. */
+		{
+			time_t now;
+
+			(void) time(&now);
+			ut.ut_time = now & 0xffffffff; /* Discard bits. */
+		}
+#else /* Equal size time representation. */
 		(void) time(&ut.ut_time);
+#endif
 		retval=set_utmp(tty, &ut);
 	}
 

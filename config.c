@@ -93,7 +93,12 @@ char *argv[];
 		VERBOSE_PRINT("\tI see you are running Solaris.\n");
 	}
 	else
+#if defined(__GLIBC__)
+		VERBOSE_PRINT("\tA bold user of GNU/kFreeBSD or GNU/Hurd.\n");
+		strcat(cflags, " -O2");
+#else /* !__GLIBC__ */
 		strcat(cflags, " -O");
+#endif
 
 	/* Check for IRIX */
 	if ( grep("/usr/include", "unistd.h", "_getpty") )
@@ -118,8 +123,11 @@ char *argv[];
 		VERBOSE_PRINT("\tYour utmp file uses the host field.\n");
 	}
 
-	/* Check for termio.h */
-	if ( exists(INCLUDE, "termio.h") ) {
+	/* Check for termio[s].h */
+	if ( exists(INCLUDE, "termios.h") ) {
+		strcat(cflags, " -DHAVE_TERMIOS_H");
+		VERBOSE_PRINT("\tI will use termios tty structures.\n");
+	} else if ( exists(INCLUDE, "termio.h") ) {
 		strcat(cflags, " -DHAVE_TERMIO_H");
 		VERBOSE_PRINT("\tI will use termio tty structures.\n");
 	} else 
@@ -136,12 +144,14 @@ char *argv[];
 		VERBOSE_PRINT("\tI see you have BSD tty support.\n");
 	}
 
+#if !__GLIBC__	/* False positive for GNU/kFreeBSD */
 	/* Check for ioctl compatibility.  (FreeBSD) */
 	if ( exists(INCLUDE, "sys/ioctl_compat.h") ) {
 		strcat(cflags, " -DNEED_COMPAT_H");
 		VERBOSE_PRINT(
 			"\tI will use your ioctl compatibility header.\n");
 	}
+#endif
 
 	/* Check for BSD socket library header (AT&T) */
 	if ( exists(INCLUDE, "sys/inet.h") ) {

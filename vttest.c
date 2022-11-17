@@ -18,7 +18,13 @@
 #include	<fcntl.h>
 #ifdef HAVE_TERMIO_H 
 #include        <termio.h> 
-#else 
+#elif defined HAVE_TERMIOS_H
+# include <termios.h>
+# include <sys/ioctl.h>
+# ifndef termio
+#  define termio termios
+# endif
+#else /* !HAVE_TERMIO_H && !HAVE_TERMIOS_H */
 #include	<setjmp.h> 
 #include	<signal.h> 
 #include	<sys/ioctl.h> 
@@ -35,13 +41,17 @@
 #include        <sys/bsdtty.h>
 #endif /* HAVE_BSDTTY_H */
 
+#ifndef OLCUC
+# define OLCUC 0	/* Missing inf FreeBSD and GNU/kFreeBSD. */
+#endif
+
 #ifdef MAIN
 int main() { if ( vttest() ) printf("vt100\n"); }
 #endif
 
 /* Register that we are alarmed. (called by SIG_ALRM on BSD) */
 static int alarmed;
-#ifndef HAVE_TERMIO_H
+#if !defined(HAVE_TERMIO_H) && !defined(HAVE_TERMIOS_H)
 static jmp_buf alarm_buf;
 static void alrm_trap() { alarmed=1; longjmp(alarm_buf, 1); }
 #endif /* No termio.h */
@@ -59,11 +69,17 @@ int vttest()
 	if ( (fd=open("/dev/tty", O_RDWR, 0666)) < 0 )
 		return(0);
 
+#ifdef HAVE_TERMIOS_H
+	if ( tcgetattr(fd, &ttold) < 0 )
+		return(0);
+	(void) tcgetattr(fd, &ttraw);
+#else /* !HAVE_TERMIOS_H */
 	if ( ioctl(fd, TCGETA, (char *)&ttold) < 0 )
 		return(0);
 	(void) ioctl(fd, TCGETA, (char *)&ttraw);
+#endif
 
-#ifdef HAVE_TERMIO_H
+#if defined(HAVE_TERMIO_H) || defined(HAVE_TERMIOS_H)
 #ifdef SEVEN_BIT
         ttraw.c_iflag=(IGNBRK | ISTRIP);   /* turn off all input control */
 #else
@@ -74,17 +90,22 @@ int vttest()
         ttraw.c_lflag = 0;
         ttraw.c_cc[VMIN]=0;          /* 1 or more chars satisfy read */
         ttraw.c_cc[VTIME]=10;        /* 10'ths of seconds between chars */
-#else
+#else /* !HAVE_TERMIO_H && !HAVE_TERMIOS_H */
 	ttraw.sg_flags |= RAW;		/* turn RAW mode on */
 	ttraw.sg_flags &= ~ECHO;	/* turn ECHO off */
 #endif /* HAVE_TERMIO_H */
 
+#ifdef HAVE_TERMIOS_H
+        if (tcsetattr(fd, TCSADRAIN, &ttraw) < 0)
+#else /* !HAVE_TERMIOS_H */
         if (ioctl(fd, TCSETAW, (char *)&ttraw) < 0)
+#endif
                 return(0);
 
   	write(fd,"\033[c", 3);	/* Vt100 test: ESC [ c */
 
-#ifndef HAVE_TERMIO_H		/* We need to set an alarm */
+#if !defined(HAVE_TERMIO_H) && !defined(HAVE_TERMIOS_H)
+	/* We need to set an alarm */
 	signal(SIGALRM, alrm_trap);
 	alarmed=0;
 	alarm(1);
@@ -98,11 +119,15 @@ int vttest()
   	if ( buff[0] == '\033' )	/* An escape sequence? :) */
 		rc=1;
 
-#ifndef HAVE_TERMIO_H
+#if !defined(HAVE_TERMIO_H) && !defined(HAVE_TERMIOS_H)
 	alarm(0);
 	signal(SIGALRM, SIG_DFL);
 #endif
+#if HAVE_TERMIOS_H
+        (void) tcsetattr(fd, TCSADRAIN, &ttold);
+#else /* !HAVE_TERMIOS_H */
         (void) ioctl(fd, TCSETAW, (char *)&ttold);
+#endif
 	(void) close(fd);
 
 #ifdef not_defined		/* Print out the response for debugging */

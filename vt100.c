@@ -14,7 +14,9 @@
 #include	<sys/types.h>
 #ifdef HAVE_TERMIO_H
 #include	<termio.h>		/* Used only for TIOCGWINSZ */
-#else
+#elif defined(HAVE_TERMIOS_H)
+#include	<termios.h>
+#else /* !HAVE_TERMIO_H && !HAVE_TERMIOS_H */
 #include	<sys/ioctl.h>		/* Used only for TIOCGWINSZ */
 #endif
 #include	<errno.h>
@@ -141,7 +143,7 @@ window *win;
 	unsigned char on=NORMAL;
 
 	vt_resetattr();
-	(void) check_attr(0, win->textattr, &on);
+	(void) check_attr(0, win->textattr, on);
 }
 
 /* Process the ^[[X;Xm escape.  Made into a separate routine to support
