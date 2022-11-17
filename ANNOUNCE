@@ -1,0 +1,120 @@
+Subject: SECURITY: Announcing Splitvt 1.6.3
+Newsgroups: alt.sources
+Summary: 
+Keywords: 
+
+
+Announcing the newest version of splitvt!
+
+SECURITY ALERT!!!
+
+	splitvt versions lower than 1.6.3 are known to have a
+security hole allowing a user to gain ROOT access on some systems!
+
+	If you have a version lower than 1.6.3 _please_ remove
+the set-uid bit on your current version, and upgrade to the newer
+version as soon as possible.
+("splitvt -version" will tell you what version you are running)
+
+The set-uid bit is only for updating the utmp database and for
+changing ownership of its pseudo-terminals.  It is not necessary
+for splitvt's operation.
+
+The latest version is available via anonymous ftp from 
+dandelion.ceres.ca.gov in the /pub/splitvt directory.
+
+
+What it is:
+
+	Splitvt is a program that splits any vt100 compatible 
+screen into two - an upper and lower window in which you can run
+two programs at the same time.  Splitvt differs from screen in 
+that while screen gives you multiple virtual screens, splitvt splits
+your screen into two fully visible windows.  You can even use 
+splitvt with screen to provide multiple split screens.  This can 
+be very handy when running over a modem, or for developing
+client-server applications.
+
+What can I use it for?
+
+	Well, at this time, I am aware of several ways in which
+people are using splitvt.  Some people like to use it over the modem
+to allow them more than one window at a time, others like to use it
+in xterms because they prefer having everything on the screen at once,
+and some people are using it in conjunction with the -rcfile option 
+to automate system administration tasks.
+	If you are using splitvt in a new and unusual way,
+I'd like to hear about it! 
+Direct all comments to slouken@cs.ucdavis.edu
+
+Where can I get it?
+
+	Splitvt is available for anonymous ftp from
+dandelion.ceres.ca.gov in the /pub/Linux/splitvt directory.
+You can also get it from sunsite.unc.edu in /pub/Linux/Incoming
+now, and will hopefully to be moved to /pub/Linux/utils/terminal.
+The file is splitvt-1.6.3.tgz and it is in tarred and gzipped format.
+
+What's new?
+
+	Lots of stuff. :)
+Here is the list of things from the CHANGES file:
+
+	Version 1.6.3
+			Patched some security holes:
+				fixed sprintf overflow in parserc.c
+				fixed env label overflow in parserc.c
+				fixed env variable expansion overflow
+				added read access check in parserc.c
+				added chdir() access check in parserc.c
+				fixed sprintf overflow in vtmouse.c
+
+	Version 1.6.2
+			Fixed a bug in vt_showscreen()
+			Fixed separator redisplay in vt_prompt()
+			Added the ANNOUNCE file
+			Added a "cd" command to the startup file
+			Added -t option to change xterm title
+			xterm title is reset, if possible, at exit
+			Added xterm drag-n-drop of separator bar
+			Speeded up separator bar movement
+(broken)		Fixed cut-paste highlighting
+(broken)		Integrated cut-paste with X selection (xcb)
+			Fixed job control for FreeBSD
+					(thanks to Quang Ngo)
+			Fixed bug in cursor keys (showed up in vi)
+----
+
+What's planned?
+
+	I want to beef up the startup file syntax so that you can
+specify the format of the "status bar", or window divider, and I plan
+to rewrite the startup file parser so that it allows you to use more
+flexible and powerful startup scripts.  I am also toying with the idea
+of cut-paste "screen" style, and a window history that you can scroll
+back through.  I have cut-paste partially working.
+Other things on the pot are cleaning up dead windows, dynamically starting
+new windows, etc...
+	If you have any wishes, just let me know at slouken@cs.ucdavis.edu,
+and I'll try to include them in future releases of splitvt.  I'll try to 
+avoid feeping creaturism, but a few bells and whistles would be nice. :)
+
+Note: At the moment I have several other projects, and have this one on
+      unspecified hold.  This release was mainly to fix some security holes.
+
+Will it run on my system?
+
+	Well, if you run a UNIX that has pseudo-tty support, 
+chances are that splitvt will work on your system.  Splitvt has
+been ported to all of the "standard" unices, and also to a few
+oddball unices, such as AIX, NewsOS, MP-RAS, and NeXT.
+
+Well, that about wraps it up.  I hope you enjoy this software,
+originally conceived by Dave Ljung and created by yours truly.
+
+
+Enjoy!
+
+	-Sam Lantinga		(slouken@cs.ucdavis.edu)
+
+
