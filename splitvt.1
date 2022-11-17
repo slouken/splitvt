@@ -1,3 +1,15 @@
+.if n .ig
+.de HB
+.ie \\n[.$] .ft HB
+.el \f[HB]\\$*\fP
+..
+.if t .ig
+.de HB
+.ie \\n[.$] .ul 999
+.el .ul
+\\$*
+..
+.als TB HB
 .TH SPLITVT 1 "1/5/95" "SPLITVT" "NONESSENTIAL UTILITIES"
 
 .SH NAME
