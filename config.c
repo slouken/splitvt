@@ -28,6 +28,24 @@ char *file;
 		return(0);
 }
 
+void finddeblibmultiarch(deblibmultiarch)
+char *deblibmultiarch;
+{
+   FILE *pipe_fp;
+   char debhostmultiarch[BUFSIZ];
+   // Get host arch (i386-linux-gnu, amd64-linux-gnu,...)
+   if (( pipe_fp = popen("dpkg-architecture -qDEB_HOST_MULTIARCH", "r")) == NULL){
+      perror("popen error: Can't finish creating Makefile");
+      printf("Configuration aborted. Exiting.\n");
+      exit(2);
+   }
+   fscanf(pipe_fp,"%s",debhostmultiarch);
+   pclose(pipe_fp);
+   // Build library's path
+   strcat(deblibmultiarch,"/usr/lib/");
+   strcat(deblibmultiarch, debhostmultiarch);
+   strcat(deblibmultiarch, "/");
+}
 
 main(argc, argv)
 int argc;
@@ -111,7 +129,9 @@ char *argv[];
 #endif /* linux */
 
 	/* Check for the termcap library */
-	if ( exists("/usr/lib", "libtermcap.a") ) {
+        char deblibmultiarch[BUFSIZ];
+        finddeblibmultiarch(deblibmultiarch);
+	if ( exists(deblibmultiarch, "libtermcap.a") ) {
 		strcat(cflags, " -DTERMCAP");
 		strcat(ldflags, " -ltermcap");
 		VERBOSE_PRINT("\tUsing the termcap library for terminal support.\n");
