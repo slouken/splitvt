@@ -2,6 +2,7 @@
 /* The cut-paste module for splitvt */
 
 #include	<stdio.h>
+#include	<string.h>
 #include	"vt100.h"
 #include	"video.h"
 

@@ -2,6 +2,7 @@
 /* This file holds the functions for manipulating video memory */
 
 #include	<stdio.h>
+#include	<stdlib.h>
 #include	"video.h"
 #include	"terminal.h"
 

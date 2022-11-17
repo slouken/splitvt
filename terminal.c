@@ -6,6 +6,7 @@
 
 
 #include	<stdio.h>
+#include	<string.h>
 #include	"video.h"
 #include	"terminal.h"
 
@@ -274,6 +275,7 @@ int *cols;
 		return("Terminal type must be set to vt100");
 
 	if ( strncmp(termtype, "vt10x", 4) != 0 &&
+	     strncmp(termtype, "xterm", 5) != 0 &&
                         /* A vt10x emulation detector -->  */   ! vttest() )
                 return("Terminal type must be set to vt100");
 

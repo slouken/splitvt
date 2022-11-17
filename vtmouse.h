@@ -38,6 +38,3 @@ extern int terminal_input;	/* Set true if event_getc() can read input */
 extern int  event_init();
 extern int  event_getc();
 extern void event_quit();
-
-extern FILE *xt_input, *xt_output;	/* Usually untouched */
-

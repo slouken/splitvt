@@ -1,7 +1,7 @@
 Begin3
 Title:          Splitvt - a split windows utility
-Version:        1.6.5
-Entered-date:   13JAN2001
+Version:        1.6.6
+Entered-date:   1APR2007
 Description:    A utility to split a vt100 compatible screen into two halfs,
                 upper and lower, and run a different program simultaneously
                 in each half.

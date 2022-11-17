@@ -32,5 +32,8 @@ extern char *startupfile;
 /* The number of lines requested for the upper window (from vt100.c) */
 extern int UU_lines;
 
+/* An option to start with the bottom window in focus (from splitvt.c) */
+extern int stbottom;
+
 /* Functions exported from splitvt.c */
 extern void reset_bar();

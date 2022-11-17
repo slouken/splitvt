@@ -2,6 +2,8 @@
 #include	<stdio.h>
 #include	<sys/stat.h>
 #include	<signal.h>
+#include	<stdlib.h>
+#include	<string.h>
 
 /*#define DEBUG		/* Provides extra debugging info */
 

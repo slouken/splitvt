@@ -8,10 +8,11 @@
 
   An interesting note:
   1.6.3 was released in 1995, and 1.6.4 in 2000 - 5 years between patches!
+  1.6.4 was released in 2001, and 1.6.6 in 2006 - 5 years between patches!
 */
 
 static char *version=
-"@(#)Splitvt 1.6.5  1/12/2001  -Sam Lantinga   (slouken@devolution.com)\n";
+"@(#)Splitvt 1.6.6  3/11/2006  -Sam Lantinga   (slouken@devolution.com)\n";
 
 #include	<sys/types.h>
 #include	<sys/time.h>
@@ -19,6 +20,8 @@ static char *version=
 #include	<fcntl.h>
 #include	<signal.h>
 #include	<stdio.h>
+#include	<stdlib.h>
+#include	<string.h>
 #include	<errno.h>
 #include	<pwd.h>
 #ifdef HAVE_UNISTD_H
@@ -69,6 +72,8 @@ static int toppid=0, bottompid=0;	/* Children */
 static int ttyfd=0, thisfd;		/* I/O file descriptors */
 static int topfd, bottomfd;		/* Master file descriptors */
 
+int stbottom=0;			/* Start in the bottom vt? */ 
+
 /* Special characters */
 char 	command_c=COMMAND,
 	switch_c=SWITCH, 
@@ -91,6 +96,7 @@ char *argv;
 	fprintf(stderr, "\t-t title\t\tSets the xterm title bar to 'title'\n");
 	fprintf(stderr, "\t-upper command\t\tRuns 'command' in the upper window\n");
 	fprintf(stderr, "\t-lower command\t\tRuns 'command' in the lower window\n");
+	fprintf(stderr, "\t-bottom\t\t\tStarts in the lower window\n");
 	fprintf(stderr, "\t-login\t\t\tRuns programs as if they were login shells\n");
 	fprintf(stderr, "\t-nologin\t\tOverrides \"set login on\" in startup file\n");
 	fprintf(stderr, "\t-rcfile file\t\tLoads 'file' at startup instead of ~/.splitvtrc\n");
@@ -151,7 +157,7 @@ char *argv[];
 		splitvtrc();
 
 	/* Parse command line options */
-	while ( (i=getopt(argc, argv, "n:u:l:r:s:t:vh")) != EOF )
+	while ( (i=getopt(argc, argv, "n:u:l:r:b:s:t:vh")) != EOF )
 	{
 		switch (i)
 		{
@@ -176,6 +182,12 @@ char *argv[];
 				  } else
 					print_usage(argv[0]);
 				  break;
+			case 'b': if ( strcmp(optarg, "ottom") ==0) 
+					  stbottom=1;
+				  else
+					  print_usage(argv[0]);
+				  break;
+
 			case 'r': if ( strcmp(optarg, "cfile") != 0 )
 					print_usage(argv[0]);
 				  else /* Already handled above */
@@ -309,7 +321,9 @@ char *argv[];
 		(void) strcpy(lower_tty, tty_name);
 		(void) addutmp(pw->pw_name, pw->pw_uid, lower_tty); 
 	}
-	thisfd=topfd;
+	if (stbottom)
+		thisfd=bottomfd;
+	else thisfd=topfd;
 
 #if defined(_POSIX_SOURCE) || defined(m88k)
 #include <limits.h>

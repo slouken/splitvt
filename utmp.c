@@ -6,6 +6,7 @@
 #include	<fcntl.h>
 #include	<utmp.h>
 #include	<stdio.h>
+#include	<string.h>
 
 #ifdef DEBUG_UTMP
 #undef  UTMP_FILE

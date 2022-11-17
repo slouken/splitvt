@@ -16,6 +16,8 @@
 #endif
 #include	<errno.h>
 #include	<stdio.h>
+#include	<stdlib.h>
+#include	<string.h>
 #include	<ctype.h>
 #include	"vt100.h"
 #include	"video.h"

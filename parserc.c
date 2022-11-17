@@ -3,11 +3,12 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <string.h>
 #include <errno.h>
 #include <pwd.h>
 #include <fcntl.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <ctype.h>
 #include "splitvt.h"
 
@@ -97,6 +98,15 @@ char *args[];
 			dologin=0;
 		else
 			warn("Usage: set login [on|off]\n");
+	} else if ( strcmp(args[1], "bottom") == 0 ) {
+		if ( ! args[2] )
+			warn("Usage: set bottom [on|off]\n");
+		else if ( strcmp(args[2], "on") == 0 )
+			stbottom=1;
+		else if ( strcmp(args[2], "off") == 0)
+			stbottom=0;
+		else
+			warn("Usage set bottom [on|off]\n");
 	} else
 		warn("Invalid parameter to 'set'");
 }
