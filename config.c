@@ -260,15 +260,15 @@ char *argv[];
 	}
 	fprintf(makefile, 
 		"PTYOPTS = -DPTYCHAR=$(PTYCHAR) -DHEXDIGIT=$(HEXDIGIT)\n");
-	sprintf(line, "\nCFLAGS = -Wall %s $(PTYOPTS)\nLIBS = %s\n", cflags, ldflags);
+	sprintf(line, "\nCFLAGS += -Wall %s $(PTYOPTS)\nLIBS = %s\n", cflags, ldflags);
 	fprintf(makefile, "%s", line);
 	fprintf(makefile, "OBJS = splitvt.o misc.o utmp.o vt100.o videomem.o terminal.o vttest.o vtmouse.o \\\n");
 	fprintf(makefile, "       parserc.o lock.o cut-paste.o\n\n");
 	fprintf(makefile, "splitvt: $(OBJS)\n");
 #if defined(linux) && !defined(DEBUG)
-	fprintf(makefile, "\t$(CC) -o $@ $(OBJS) $(LIBS)\n");
+	fprintf(makefile, "\t$(CC) $(LDFLAGS) -o $@ $(OBJS) $(LIBS) \n");
 #else
-	fprintf(makefile, "\t$(CC) -o $@ $(OBJS) $(LIBS)\n");
+	fprintf(makefile, "\t$(CC) $(LDFLAGS) -o $@ $(OBJS) $(LIBS)\n");
 #endif
 	fprintf(makefile, "\nclean: \n\trm -f *.o core \n");
 	fprintf(makefile, "\ndistclean: clean\n\trm -f splitvt Makefile\n");
