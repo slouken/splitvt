@@ -1007,7 +1007,7 @@ int *source;		 File descriptor through which to reply to Esc-Z */
 
 	/* Now cycle through the input */
 	for ( i=0; i<len; ++i )
-
+		(*curwin->process_char)((int)*(data++), source);
 	vt_update();
 	return len;
 }
