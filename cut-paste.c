@@ -3,8 +3,11 @@
 
 #include	<stdio.h>
 #include	<string.h>
+#include	<unistd.h>
 #include	"vt100.h"
 #include	"video.h"
+#include	"splitvt.h"
+#include	"terminal.h"
 
 #define RIGHT 0x01
 #define LEFT  0x02
@@ -87,7 +90,6 @@ char *buf;
 int len;
 position *mark1, *mark2;
 {
-	int selection=0;
 	position startsel, endsel;
 
 	if ( mark1->x == mark2->x )
@@ -201,9 +203,9 @@ static int use_xcb=0;	/* Do we use xcb to access X selection buffers? */
 void vt_initsel()
 {
 	extern char *pathsearch();	/* From misc.c */
-	char *display;
 
 #ifdef USE_XCB
+	char *display;
 	/* Use xcb if we have both an X display and the command. */
 	/* xcb needs to support my hacked '-R' option. */
 	if ( (display=(char *)getenv("DISPLAY")) && pathsearch("xcb", 1) )
@@ -255,7 +257,7 @@ int win;
 char *buf;
 int len;
 {
-	int c, state=NORMAL;
+	int c;
 	position here, cursor, mark1, mark2;
 	window *thiswin;
 	
@@ -312,7 +314,7 @@ int len;
 			default:	break;
 		}
 	}
-	return;	/* Hopefully, we never reach here */
+	return NULL; /* Hopefully, we never reach here */
 }
 
 

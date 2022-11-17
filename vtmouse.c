@@ -7,10 +7,13 @@
 
 #define SPLITVT_SOURCE
 
+#include <string.h>
+#include <stdlib.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "vtmouse.h"
+#include "splitvt.h"
 
 extern FILE *safe_popen();		/* From misc.c */
 

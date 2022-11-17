@@ -176,7 +176,7 @@ SPLITVT(1)	    NONESSENTIAL UTILITIES	   SPLITVT(1)
        replace it with entries for the two windows.  This  allows
        you to use programs such as 'talk' within the splitvt win-
        dows.   If  you	do  not	have  write  permission  to  the
-       /etc/utmp  file,	you  will not be able to modify the utmp
+       /etc/utmp  file, you  will not be able to modify the utmp
        entries.
 
        splitvt can be made set-uid root.  splitvt will reset  its

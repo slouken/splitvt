@@ -37,3 +37,24 @@ extern int stbottom;
 
 /* Functions exported from splitvt.c */
 extern void reset_bar();
+
+/* If set, allow resizing to less than 3 lines */
+extern int force_height;
+
+void tokenize(char *array[], int size, char *line, char *tokens);
+void d_copy(register char *src, register char *dst, register int len);
+int tty_getmode(int fd);
+int tty_raw(int fd);
+int tty_reset(int fd);
+int tty_sane(int fd);
+int remove_me(void);
+int pty_open(char *argv[], int *childpid, int win);
+int addutmp(char *user, int uid, char *tty);
+char *vt_setsel(char *buf, int len, int startx, int endx, int starty, int endy);
+int delutmp(char *user, char *tty);
+int replace_me(void);
+void pty_setwin(int fd, int win);
+void d_zero(register char *dst, register int len);
+void vt_initsel(void);
+int vttest(void);
+int safe_pclose(FILE *pipefp);

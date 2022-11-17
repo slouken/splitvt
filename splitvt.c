@@ -14,6 +14,9 @@
 static char *version=
 "@(#)Splitvt 1.6.6  3/11/2006  -Sam Lantinga   (slouken@devolution.com)\n";
 
+#include	<string.h>
+#include	<unistd.h>
+#include	<stdlib.h>
 #include	<sys/types.h>
 #include	<sys/time.h>
 #include	<sys/wait.h>
@@ -84,6 +87,8 @@ int     dologin=0;		/* Do the shells run as login shells? */
 char *upper_args[MAX_ARGS+1]={NULL}, *lower_args[MAX_ARGS+1]={NULL};
 int upper_empty=1, lower_empty=1;
 
+int force_height=0;
+
 void print_usage(argv)
 char *argv;
 {
@@ -101,13 +106,14 @@ char *argv;
 	fprintf(stderr, "\t-nologin\t\tOverrides \"set login on\" in startup file\n");
 	fprintf(stderr, "\t-rcfile file\t\tLoads 'file' at startup instead of ~/.splitvtrc\n");
 	fprintf(stderr, "\t-norc\t\t\tSuppresses loading your startup file\n");
+  	fprintf(stderr, "\t-f\t\t\tAllow setting screen size of less than 3 lines\n");
 	fprintf(stderr, "\t-v\t\t\tPrint out the version number\n");
 	fprintf(stderr, "\n");
 	exit(1);
 }
 
  
-main(argc, argv)
+int main(argc, argv)
 int argc;
 char *argv[];
 {
@@ -117,7 +123,10 @@ char *argv[];
 	int i, len, maxfds, numready;
 	char buffer[BUFSIZ], *ptr;
 	char *xterm_title=NULL;
-	struct timeval tv, *tvptr;
+#ifdef NEED_INET_H
+	struct timeval tv;
+#endif
+	struct timeval *tvptr;
 	fd_set read_mask;
 	static struct passwd pwdata;	/* Our passwd entry */
 
@@ -157,7 +166,7 @@ char *argv[];
 		splitvtrc();
 
 	/* Parse command line options */
-	while ( (i=getopt(argc, argv, "n:u:l:r:b:s:t:vh")) != EOF )
+	while ( (i=getopt(argc, argv, "fn:u:l:r:b:s:t:vh")) != EOF )
 	{
 		switch (i)
 		{
@@ -169,11 +178,19 @@ char *argv[];
 				  break;
 			case 'u': if ( strcmp(optarg, "pper") != 0 )
 					print_usage(argv[0]);
+				  if (optind >= argc) {
+					fprintf(stderr, "-upper requires an argument\n");
+					print_usage(argv[0]);
+				  }
 				  tokenize(upper_args, MAX_ARGS+1,
 						  argv[optind++], " ");
 				  upper_empty=0;
 				  break;
 			case 'l': if ( strcmp(optarg, "ower") == 0 ) {
+					if (optind >= argc) {
+						fprintf(stderr, "-lower requires an argument\n");
+						print_usage(argv[0]);
+					}
 				  	tokenize(lower_args, MAX_ARGS+1,
 							argv[optind++], " ");
 				  	lower_empty=0;
@@ -200,7 +217,9 @@ char *argv[];
 			case 'v': printf("%s", version+4);
 				  exit(0);
 				  break;
-			case 'h':
+		  	case 'f': force_height=1;
+		  		  break;
+		        case 'h':
 			default:  print_usage(argv[0]);
 				  break;
 		}
@@ -224,7 +243,7 @@ char *argv[];
 	}
 	(void) tty_raw(0);   /* Set the tty raw here to prevent lost input */
 
-	if ( (ptr=init_vt100()) != NULL )
+	if ( (ptr=init_vt100(1)) != NULL )
 	{
 		if ( tty_reset(0) < 0 )	
 			(void) tty_sane(0);
@@ -487,6 +506,7 @@ char *argv[];
 		}
 	}
 	finish(0);
+	exit(0);
 }
 
 void reset_bar(sleeptime)
@@ -510,6 +530,7 @@ void print_help()
 "	'x'	Lock the screen",
 "	'h'	Show this help screen",
 "	'q'	Quickly quit splitvt",
+"	'0-9'	Line count for + or -",
 NULL
 };
 	vt_showscreen("Splitvt HELP screen:", help);
@@ -714,7 +735,7 @@ int howfar;
 	tmp_uulines=UU_lines;
 	UU_lines=WU_lines;
 	UU_lines += howfar;	/* Positive to go down, negative to go up */
-	init_vt100();		/* Reset the windows to the new size */
+	init_vt100(0);		/* Reset the windows to the new size */
 
 	/* Tell the running processes about the size change */
 	if ( topok )
@@ -736,7 +757,7 @@ int sig;
 
 	signal(sig, winch);
 
-	if ( (ptr=init_vt100()) != NULL ) {
+	if ( (ptr=init_vt100(1)) != NULL ) {
 		fprintf(stderr, "Can't resize window: %s. (exiting)\n", ptr);
 		finish(0);
 	} else

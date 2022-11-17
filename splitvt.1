@@ -51,6 +51,11 @@ Loads 'file' as the startup file instead of ~/.splitvtrc.
 Suppresses loading your ~/.splitvtrc
 .TP
 .TB
+.I -f
+Allow setting the height of either the top or the bottom window to less than
+3 lines.
+.TP
+.TB
 .I -v
 Print out the version number of splitvt
 .LP
@@ -177,7 +182,7 @@ and then releasing the button.
 splitvt will attempt to erase the current utmp entry, and replace it
 with entries for the two windows.  This allows you to use programs
 such as 'talk' within the splitvt windows.  If you do not have write
-permission to the /etc/utmp file, you will not be able to modify the
+permission to the /var/run/utmp file, you will not be able to modify the
 utmp entries.
 
 splitvt can be made set-uid root.  splitvt will reset its user id to

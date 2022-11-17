@@ -3,17 +3,6 @@
 #	An example menu utilizing the SPLITVT environment variable.
 #
 
-# Portably echo a line with no trailing newline:
-echo_n() {
-	if [ "`echo -n \"\"`" = "" ]; then
-		echo -n "$*"
-	elif [ "`echo -e \"\\c\"`" == "" ]; then
-		echo -e "$*\c"
-	else 
-		echo "$*\c"
-	fi
-}
-
 if [ "$SPLITVT" = "upper" ]; then
 	echo "This is the upper window MENU:"
 	echo ""
@@ -21,7 +10,7 @@ if [ "$SPLITVT" = "upper" ]; then
 	echo "2)	oranges"
 	echo "3)	bananas"
 	echo ""
-	echo_n "Enter your fruit of choice: "
+	printf "Enter your fruit of choice: "
 	read fruit
 	case $fruit in
 		1)	echo "You like apples!";;
@@ -36,7 +25,7 @@ elif [ "$SPLITVT" = "lower" ]; then
 	echo "2)	carrots"
 	echo "3)	cabbage"
 	echo ""
-	echo_n "Enter your vegetable of choice: "
+	printf "Enter your vegetable of choice: "
 	read fruit
 	case $fruit in
 		1)	echo "You like pickles!";;

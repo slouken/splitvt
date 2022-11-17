@@ -1,6 +1,8 @@
 
 /* Routines to parse the ~/.splitvtrc file and set default options */
 
+#include <unistd.h>
+#include <stdlib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <errno.h>
@@ -223,7 +225,7 @@ void splitvtrc()
 	char line[BUFSIZ], newline[BUFSIZ*2], *parsed[256];
 	char *head, *tail, *ptr, *subptr;
 	char *envptr, envbuf[128];
-	int  i, n, quoted=0;
+	int  i, n;
 	int  ignoring=0, ifs=0;
 
 	/* Get our home directory */

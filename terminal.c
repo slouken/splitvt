@@ -4,9 +4,11 @@
    actually write to the terminal.
 */
 
-
+#include	<curses.h>
+#include	<term.h>
 #include	<stdio.h>
 #include	<string.h>
+#include	"splitvt.h"
 #include	"video.h"
 #include	"terminal.h"
 
@@ -126,7 +128,7 @@ char *termtype;
 	}
 	return(NULL);
 }
-void outc(c) int c; { putchar(c); }
+int outc(c) int c; { return putchar(c); }
 
 void vt_rows_cols(termtype, rows, cols)
 char *termtype;

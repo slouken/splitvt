@@ -1,9 +1,13 @@
 
 /* The screen locking module for splitvt */
 
+#include	<unistd.h>
+#include	<sys/types.h>
+#include	<string.h>
 #include	<stdio.h>
 #include	<pwd.h>
 #include	"vt100.h"
+#include	"splitvt.h"
 
 #define UNLOCKED	0
 #define ENTERED1	1

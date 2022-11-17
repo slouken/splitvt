@@ -1,12 +1,19 @@
 /* Miscellaneous system dependent routines for splitsh */
 
+#define _GNU_SOURCE /* for getpt and other gnu extensions to libc */
+
 #include	<sys/types.h>
+#include	<sys/wait.h>
+#include	<unistd.h>
+#include	<stdlib.h>
 #include	<sys/stat.h>
 #include	<fcntl.h>
 #include	<stdio.h>
 #include	<stdlib.h>
 #include	<string.h>
 #include	<signal.h>
+#include	<utime.h>
+#include	<string.h>
 
 
 #ifdef HAVE_TERMIO_H
@@ -25,6 +32,8 @@
 #ifdef NEED_INET_H
 /*#define STTY_HACK*/
 #endif
+
+int tty_reset(int fd);
 
 /*
  * Initialize a pty, fork a command running under it, and then 
@@ -46,7 +55,10 @@ int win;		/* 0 for upper, 1 for lower */
 	int get_master_pty(), get_slave_pty();
 	char *get_ttyname(), *myputenv();
 
-	char LINES[12], COLUMNS[12], SPLITVT[24];
+#ifndef TIOCGWINSZ
+	char LINES[12], COLUMNS[12];
+#endif
+	char SPLITVT[24];
 	int returnfd, slave_fd;
 
 	/* Get the master pty file descriptor */
@@ -108,8 +120,16 @@ int win;		/* 0 for upper, 1 for lower */
 		/* "touch" the tty so 'w' reports proper idle times */
 		(void) utime(get_ttyname(), NULL);
 
+		/* Set our gid to our real gid if necessary */
+		if (setgid(getgid()) != 0) {
+			perror("setgid");
+			exit(1);
+		}
 		/* Set our uid to our real uid if necessary */
-		(void) setuid(getuid());
+		if (setuid(getuid()) != 0) {
+			perror("setuid");
+			exit(1);
+		}
 			
 		/* Run the requested program, with possible leading dash. */
 		execvp(((*argv[0] == '-') ? argv[0]+1 : argv[0]), argv);
@@ -184,13 +204,14 @@ int get_slave_pty()
 #else /* ! IRIX */
 
 
-#if defined(SOLARIS) || defined(linux)		/* System V.4 pty routines from W. Richard Stevens */
+#if defined(SOLARIS) || defined(__GLIBC__)	/* System V.4 pty routines from W. Richard Stevens */
 
 #ifdef SOLARIS
 #include <stropts.h>
-#endif
 
 #define DEV_CLONE	"/dev/ptmx"
+
+#endif
 
 extern char *ptsname();
 
@@ -199,9 +220,14 @@ int get_master_pty()
 
 	char 	*ttyptr;
 
+#ifdef SOLARIS
 	if ( (master_fd=open(DEV_CLONE, O_RDWR)) < 0 )
 		return(-1);
-
+#else /* GLIBC */
+	if ( (master_fd=getpt()) == -1 )
+		return (-1);
+#endif
+	
 	if ( grantpt(master_fd) < 0 )	/* grant access to slave */
 	{
 		close(master_fd);
@@ -399,8 +425,10 @@ void d_zero(dst, len)
 
 void dropctty()
 {
+#ifndef CIBAUD
 	int fd;
-
+#endif
+	
 #if defined(_POSIX_SOURCE) || defined(SOLARIS) || \
 				defined(__386BSD__) || defined(__FreeBSD__)
 	setsid();		/* The POSIX solution is simple. :) */
@@ -714,7 +742,6 @@ char *string;
 	extern char **environ;	/* The process environment strings */
 
 	char *newptr, **envptr;
-	char *tmptr, temp[BUFSIZ];
 	int   distance, n=0;
 
 	for ( distance=0; ((*(string+distance)) && 
@@ -765,7 +792,7 @@ int size;
 char *line;
 char *tokens;
 {
-	char *head, *ptr;
+	char *head;
 	int i=0;
 
 	for ( head=line; *line && i < size-2; ) {
@@ -853,7 +880,7 @@ char *type;
 {
 	char *argv[4];
 	int pipe_fds[2];
-	int rw, child;
+	int rw;
 
 	if ( strcmp(type, "r") == 0 )
 		rw=0;	/* READ access for parent */
@@ -877,7 +904,14 @@ char *type;
 			close(pipe_fds[0]); close(pipe_fds[1]); 
 
 			/* Set our uid to our real uid if necessary */
-			(void) setuid(getuid());
+			if (setgid(getgid()) != 0) {
+				perror("setgid");
+				exit(1);
+			}
+			if (setuid(getuid()) != 0) {
+				perror("setuid");
+				exit(1);
+			}
 			
 			/* Run the requested program */
 			argv[0]="/bin/sh";

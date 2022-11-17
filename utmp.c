@@ -1,22 +1,27 @@
 
 /*  utmp.c    Shareware Copyright by Sam Lantinga	10/6/93	*/
 
+#include	<unistd.h>
 #include	<sys/types.h>
 #include	<sys/stat.h>
 #include	<fcntl.h>
 #include	<utmp.h>
 #include	<stdio.h>
 #include	<string.h>
+#include	<time.h>
+#include	"splitvt.h"
 
 #ifdef DEBUG_UTMP
 #undef  UTMP_FILE
 #define UTMP_FILE  "/tmp/utmp"
 #else
 #ifndef UTMP_FILE
-#define UTMP_FILE  "/etc/utmp"
+#define UTMP_FILE  "/var/run/utmp"
 #endif /* UTMP_FILE */
 #endif /* DEBUG_UTMP */
 
+int get_utmp(char *tty, struct utmp *save);
+int set_utmp(char *tty, struct utmp *save);
 
 /* Remove us from the utmp file, saving our entry to replace later */
 
@@ -95,7 +100,7 @@ struct utmp *save;
   		if (strncmp(ttyptr, ut.ut_line, sizeof(ut.ut_line)) == 0) {
 			/* Break out; we've found our entry! */
 			if ( save )
-				d_copy((char *)&ut, save, sizeof(ut));
+				d_copy((char *)&ut, (char *)&save, sizeof(ut));
 			close(fd);
 			return(0);
     		}
@@ -159,7 +164,9 @@ char *user;		/* The user to add to the utmp file */
 int uid;		/* The uid corresponding to user */
 char *tty;		/* /dev/ttyxx */
 {
+#if !defined(SOLARIS) && !defined(IRIX) && !defined(__GLIBC__)
 	struct stat sb;
+#endif
 	struct utmp ut;
 	char *ttyptr;
 
@@ -196,12 +203,13 @@ char *tty;		/* /dev/ttyxx */
 #endif
 	(void) time(&ut.ut_time);
 
-#if !defined(SOLARIS) && !defined(IRIX)
-	/* Solaris and Irix machines do this automatically */
+#if !defined(SOLARIS) && !defined(IRIX) && !defined(__GLIBC__)
+	/* Solaris and Irix and GLIBC machines do this automatically */
 	/* Change the ownership and mode of the tty */
 	if ( stat(tty, &sb) == 0 ) {
 		(void) chmod(tty, 0620);  /* crw--w---- */
 		(void) chown(tty, uid, sb.st_gid);
+		
 	}
 #endif
 	return(set_utmp(tty, &ut));

@@ -8,6 +8,9 @@
    Many thanks to Matt Ostanik who wrote the ANSI Handbook.
 */
 
+#include	<unistd.h>
+#include	<string.h>
+#include	<stdlib.h>
 #include	<sys/types.h>
 #ifdef HAVE_TERMIO_H
 #include	<termio.h>		/* Used only for TIOCGWINSZ */
@@ -22,6 +25,7 @@
 #include	"vt100.h"
 #include	"video.h"
 #include	"terminal.h"
+#include	"splitvt.h"
 
 #define SEP_CHAR	' '		/* Separator bar character */
 
@@ -685,10 +689,9 @@ int *source;
 					break;
 				case 3: /* 132 char/row */
 					if ( physical.cols != 132 ) {
-						upper.cols=132;
-						lower.cols=132;
 						physical.cols=132;
 						vt_widemode(1);
+						init_vt100(0);
 					}
 					break;
 				case 4: /* Set jump scroll */	
@@ -728,11 +731,9 @@ int *source;
 					break;
 				case 3: /* 80 char/row */
 					if ( physical.cols == 132 ) {
-						vt_rows_cols(terminal_type, 
-							NULL, &physical.cols);
-						upper.cols=physical.cols;
-						lower.cols=physical.cols;
+					        physical.cols = 80;
 						vt_widemode(0);
+						init_vt100(0);
 					}
 					break;
 				case 4: /* Set smooth scroll */	
@@ -845,7 +846,8 @@ int *source;
 
 static int setup_vt100 = 0;	/* Have we initialized the vt100 system? */
 
-char *init_vt100()
+char *init_vt100(reread_tsize)
+int reread_tsize;
 {
 #ifdef TIOCGWINSZ
 	struct /* winsize */ {
@@ -855,7 +857,7 @@ char *init_vt100()
 		unsigned short	ws_ypixel;	/* vertical size - not used */
 	} mywinz;
 #endif
-	int i, **videomem, oldrows, newrows, newcols;
+	int i, **videomem, oldrows = 0, newrows, newcols;
 	position newpos;
 	char *ptr, *errmesg;
 
@@ -871,18 +873,22 @@ char *init_vt100()
 		vt_initsel();
 	}
 
+	if (reread_tsize)
+	{
 #ifdef TIOCGWINSZ
-	if ( ioctl(0, TIOCGWINSZ, &mywinz) == 0 ) {
-		if ( mywinz.ws_row )
-			physical.rows=mywinz.ws_row;
-		if ( mywinz.ws_col )
-			physical.cols=mywinz.ws_col;
-	}
+		if ( ioctl(0, TIOCGWINSZ, &mywinz) == 0 ) {
+			if ( mywinz.ws_row )
+				physical.rows=mywinz.ws_row;
+			if ( mywinz.ws_col )
+				physical.cols=mywinz.ws_col;
+		}
 #endif
-	if ( (ptr=(char *)getenv("LINES")) != NULL )
-		physical.rows=atoi(ptr);
-	if ( (ptr=(char *)getenv("COLUMNS")) != NULL )
-		physical.cols=atoi(ptr);
+
+		if ( (ptr=(char *)getenv("LINES")) != NULL )
+			physical.rows=atoi(ptr);
+		if ( (ptr=(char *)getenv("COLUMNS")) != NULL )
+			physical.cols=atoi(ptr);
+	}
 
 	/* Now set defaults if we can't find the window size */
 	if ( ! physical.rows )	physical.rows=24;
@@ -894,19 +900,21 @@ char *init_vt100()
 	if ( physical.rows < 7 )
 		return("Screen is not tall enough to split.");
 
-	/* If physical.cols has been set to 132, assume we are on a
-	   vt100 wide terminal, and set 132 column mode.  Note that
-	   setting COLUMNS in the environment will override termcap */
-	if ( physical.cols == 132 )
-		vt_widemode(1);
+	if ( ! setup_vt100 ) {
+		/* If physical.cols has been set to 132, assume we are on a
+		   vt100 wide terminal, and set 132 column mode.  Note that
+		   setting COLUMNS in the environment will override termcap */
+		if ( physical.cols == 132 )
+			vt_widemode(1);
+	}
 
 	/* Set the exportable variables */
 	if ( UU_lines ) {
 		/* Check the user set # of lines */
-		if ( UU_lines > (physical.rows-1-3) )
-			LU_lines=(physical.rows-1-3);
-		else if ( UU_lines < 3 )
-			LU_lines=3;
+		if ( UU_lines > (physical.rows-1-3+(2*force_height)) )
+			LU_lines=(physical.rows-1-3+(2*force_height));
+	  	else if ( UU_lines < 3 - (2*force_height))
+	    		LU_lines=3 - (2*force_height);
 		else
 			LU_lines=UU_lines;
 

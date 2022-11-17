@@ -161,6 +161,7 @@ char *argv[];
 		VERBOSE_PRINT("\tI will use wait4() instead of waitpid().\n");
 	}
 
+#if 0
 	if ( exists("/usr/lib", "libnet.a") )	/* Socket routines */
 		strcat(ldflags, " -lnet");
 	if ( exists("/usr/lib", "libnsl.a") )	/* AT&T socket library */
@@ -169,9 +170,10 @@ char *argv[];
 		strcat(ldflags, " -lnsl_s");
 	if ( exists("/usr/lib", "libsun.a") )	/* IRIX yp routines */
 		strcat(ldflags, " -lsun");
+#endif
 
 	/* Tell the user what kind of configuration to do */
-	if ( (access("/etc/utmp", (R_OK|W_OK)) == 0) && getuid() )
+	if ( (access("/var/run/utmp", (R_OK|W_OK)) == 0) && getuid() )
 		write_utmp=1;
 	else
 		write_utmp=0;
@@ -182,14 +184,14 @@ char *argv[];
 			VERBOSE_PRINT(
 	"This program doesn't need to be installed set-uid root.\n");
 			VERBOSE_PRINT(
-	"\nThis program will put entries for its windows in /etc/utmp.\n");
+	"\nThis program will put entries for its windows in /var/run/utmp.\n");
 		} else {
 			VERBOSE_PRINT(
-	"If installed set-uid root, this program will put entries for its windows\nin /etc/utmp.\n");
+	"If installed set-uid root, this program will put entries for its windows\nin /var/run/utmp.\n");
 		}
 	} else if ( write_utmp ) {
 		VERBOSE_PRINT(
-	"This program will put entries for its windows in /etc/utmp.\n");
+	"This program will put entries for its windows in /var/run/utmp.\n");
 		VERBOSE_PRINT(
 	"\nIf installed set-uid root, this program will change ownership of the\n");
 		VERBOSE_PRINT(
@@ -198,7 +200,7 @@ char *argv[];
 		VERBOSE_PRINT(
 	"If installed set-uid root, this program will put entries for its windows\n");
 		VERBOSE_PRINT(
-	"in /etc/utmp, and will also change ownership of the ttys it acquires to the\n");
+	"in /var/run/utmp, and will also change ownership of the ttys it acquires to the\n");
 		VERBOSE_PRINT(
 	"user running this program.\n");
 	}
@@ -227,13 +229,13 @@ char *argv[];
 	}
 	fprintf(makefile, 
 		"PTYOPTS = -DPTYCHAR=$(PTYCHAR) -DHEXDIGIT=$(HEXDIGIT)\n");
-	sprintf(line, "\nCFLAGS = %s $(PTYOPTS)\nLIBS = %s\n", cflags, ldflags);
+	sprintf(line, "\nCFLAGS = -Wall %s $(PTYOPTS)\nLIBS = %s\n", cflags, ldflags);
 	fprintf(makefile, "%s", line);
 	fprintf(makefile, "OBJS = splitvt.o misc.o utmp.o vt100.o videomem.o terminal.o vttest.o vtmouse.o \\\n");
 	fprintf(makefile, "       parserc.o lock.o cut-paste.o\n\n");
 	fprintf(makefile, "splitvt: $(OBJS)\n");
 #if defined(linux) && !defined(DEBUG)
-	fprintf(makefile, "\t$(CC) -s -o $@ $(OBJS) $(LIBS)\n");
+	fprintf(makefile, "\t$(CC) -o $@ $(OBJS) $(LIBS)\n");
 #else
 	fprintf(makefile, "\t$(CC) -o $@ $(OBJS) $(LIBS)\n");
 #endif

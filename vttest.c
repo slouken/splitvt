@@ -12,6 +12,7 @@
 	-Sam Lantinga		(slouken@toadflax.cs.ucdavis.edu)
 */
 
+#include	<unistd.h>
 #include	<sys/types.h>
 #include	<stdio.h>
 #include	<fcntl.h>
@@ -48,9 +49,12 @@ static void alrm_trap() { alarmed=1; longjmp(alarm_buf, 1); }
 int vttest() 
 {
 	char   buff[512];
-	int x=0, w, rc=0, fd;
+	int x=0, rc=0, fd;
 	struct termio ttold, ttraw;
 
+	/* Disabled since at least on sparc it causes a hang. */
+	return 1;
+	
 	/* Set the terminal in a raw mode */
 	if ( (fd=open("/dev/tty", O_RDWR, 0666)) < 0 )
 		return(0);

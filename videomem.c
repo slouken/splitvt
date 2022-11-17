@@ -1,6 +1,7 @@
 
 /* This file holds the functions for manipulating video memory */
 
+#include	<stdlib.h>
 #include	<stdio.h>
 #include	<stdlib.h>
 #include	"video.h"
@@ -114,7 +115,7 @@ int maxlen;
 int x1, x2;
 int y1, y2;
 {
-	int l=0, i, j, eol, eos;
+	int l=0, i, j, eol, eos=0;
 
 	--maxlen;	/* Account for trailing null */
 	for ( i=(x1-1); (i<x2 && l<maxlen); ++i ) {
@@ -320,7 +321,7 @@ checkchange:
 void paint_video(win)
 window *win;
 {
-	unsigned char change, on=NORMAL;
+	unsigned char on=NORMAL;
 	int i, j, oldattr=0;
 
 	vt_setscroll(0,0);
