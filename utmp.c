@@ -172,7 +172,9 @@ char *tty;		/* /dev/ttyxx */
 
 	/* Retrieve any existing utmp entry */
 	d_zero((char *)&ut, sizeof(ut));
+#if 0 /* Outdated */
 	(void) get_utmp(tty, &ut);
+#endif /* Outdated */
 
 	/* Get the ttyxy form of the tty pathname if possible. */
 	if ( *tty == '/' ) {
@@ -195,11 +197,15 @@ char *tty;		/* /dev/ttyxx */
 	ut.ut_pid=getpid();
 #endif
 #if defined(HAVE_UTHOST)
+#  if 0 /* Outdated */
 	/* remove_me() should be called before this function */
 	if ( utmp_saved ) {
 		strncpy(ut.ut_host, saved_utmp.ut_host, sizeof(ut.ut_host)-1);
 		ut.ut_host[sizeof(ut.ut_host)-1]='\0';
 	}
+#  else /* Portable and fun. */
+	strncpy(ut.ut_host, "splitvt", 8);
+#  endif
 #endif
 #if __WORDSIZE == 64 && __WORDSIZE_COMPAT32
 	/* 'time_t' is 64-bit, 'ut.ut_time' is 32-bit. */
@@ -223,7 +229,12 @@ char *tty;		/* /dev/ttyxx */
 		
 	}
 #endif
+#if 0 /* Outdated */
 	return(set_utmp(tty, &ut));
+#else	/* Only the safe use of /var/log/wtmp. */
+	logwtmp(ttyptr, user, "splitvt");
+	return 0;
+#endif
 }
 	
 
@@ -237,6 +248,7 @@ char *tty;		/* /dev/ttyxx */
 	struct utmp ut;
 	int retval=0;
 
+#if 0	/* Outdated manual manipulations. */
 	/* Retrieve any existing utmp entry */
 	d_zero((char *)&ut, sizeof(ut));
 	if ( get_utmp(tty, &ut) == 0 ) {
@@ -261,6 +273,22 @@ char *tty;		/* /dev/ttyxx */
 #endif
 		retval=set_utmp(tty, &ut);
 	}
+#else /* Portable, half-way contemporary approach. */
+	char *ttyptr;
+
+	/* Get the ttyxy form of the tty pathname if possible. */
+	if ( *tty == '/' ) {
+		for ( ttyptr=(tty+1); *ttyptr; ++ttyptr ) {
+			if ( *ttyptr == '/' )
+				break;
+		}
+		if ( *ttyptr == '/' )
+			++ttyptr;
+	} else
+		ttyptr=tty;
+
+	logwtmp(ttyptr, "", "");
+#endif
 
 #if !defined(SOLARIS) && !defined(IRIX)
 	/* Solaris and Irix machines do this automatically */

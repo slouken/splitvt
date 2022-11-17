@@ -298,7 +298,6 @@ char *argv[];
 	signal(SIGCLD, SIG_IGN);
 #endif
 
-	(void) remove_me();
 	if ( (topfd=pty_open(upper_args, &toppid, UPPER)) < 0 )
 	{
 		end_vt100();
@@ -638,8 +637,11 @@ static int isalive()
 	if ( topok )
 		if (  kill(toppid, 0) < 0 )
 		{
-			if ( pw ) 
+			if ( pw && upper_tty[0]) 
+			{
 				(void) delutmp(pw->pw_name, upper_tty);
+				upper_tty[0] = '\0';
+			}
 			if ( thisfd == topfd )
 				thisfd=bottomfd;
 			(void) close(topfd);
@@ -650,8 +652,11 @@ static int isalive()
 	if ( bottomok )
 		if ( kill(bottompid, 0) < 0 )
 		{
-			if ( pw ) 
+			if ( pw && lower_tty[0]) 
+			{
 				(void) delutmp(pw->pw_name, lower_tty);
+				lower_tty[0] = '\0';
+			}
 			if ( thisfd == bottomfd )
 				thisfd=topfd;
 			(void) close(bottomfd);
@@ -667,8 +672,11 @@ static int isalive()
 	if ( topok )
 		if ( waitpid(toppid, &status, WNOHANG) != 0 )
 		{
-			if ( pw ) 
+			if ( pw && upper_tty[0])
+			{
 				(void) delutmp(pw->pw_name, upper_tty);
+				upper_tty[0] = '\0';
+			}
 			if ( thisfd == topfd )
 				thisfd=bottomfd;
 			(void) close(topfd);
@@ -679,8 +687,11 @@ static int isalive()
 	if ( bottomok )
 		if ( waitpid(bottompid, &status, WNOHANG) != 0 )
 		{
-			if ( pw ) 
+			if ( pw && lower_tty[0]) 
+			{
 				(void) delutmp(pw->pw_name, lower_tty);
+				lower_tty[0] = '\0';
+			}
 			if ( thisfd == bottomfd )
 				thisfd=topfd;
 			(void) close(bottomfd);
@@ -712,7 +723,6 @@ int sig;
 		(void) delutmp(pw->pw_name, upper_tty);
 	if ( pw && bottomok && lower_tty[0] )
 		(void) delutmp(pw->pw_name, lower_tty);
-	(void) replace_me();
 
 	if ( sig )
 		printf("Exiting due to signal: %d\n", sig);

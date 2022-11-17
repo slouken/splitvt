@@ -120,6 +120,7 @@ char *argv[];
 	/* Check for the ut_host field in the utmp file */
 	if ( grep(INCLUDE, "utmp.h", "ut_host") ) {
 		strcat(cflags, " -DHAVE_UTHOST");
+		strcat(ldflags, " -lutil");
 		VERBOSE_PRINT("\tYour utmp file uses the host field.\n");
 	}
 

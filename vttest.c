@@ -15,6 +15,7 @@
 #include	<unistd.h>
 #include	<sys/types.h>
 #include	<stdio.h>
+#include	<unistd.h>
 #include	<fcntl.h>
 #ifdef HAVE_TERMIO_H 
 #include        <termio.h> 
