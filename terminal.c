@@ -270,8 +270,10 @@ int *cols;
 	extern char *getenv();
 	static char *termtype=NULL, *error=NULL;
 
-        if ( ((termtype=getenv("TERM")) == NULL ||
-         (strncmp(termtype, "vt10x", 4)) != 0) &&
+	if ( (termtype=getenv("TERM")) == NULL )
+		return("Terminal type must be set to vt100");
+
+	if ( strncmp(termtype, "vt10x", 4) != 0 &&
                         /* A vt10x emulation detector -->  */   ! vttest() )
                 return("Terminal type must be set to vt100");
 

@@ -29,7 +29,11 @@ int remove_me()
 	char *tty;
 	time_t now;
 
-	if ( (! isatty(0)) || ((tty=(char *)ttyname(0)) == NULL) )
+	if ( ! isatty(0) )
+		return(-1);
+
+	tty=(char *)ttyname(0);
+	if ( tty == NULL || strlen(tty)+1 > sizeof(saved_tty) )
 		return(-1);
 
 	/* Retrieve our utmp record */
@@ -174,16 +178,20 @@ char *tty;		/* /dev/ttyxx */
 		ttyptr=tty;
 
 	/* Customize the utmp entry */
-	strncpy(ut.ut_name, user, sizeof(ut.ut_name));
-	strncpy(ut.ut_line, ttyptr, sizeof(ut.ut_line));
+	strncpy(ut.ut_name, user, sizeof(ut.ut_name)-1);
+	ut.ut_name[sizeof(ut.ut_name)-1]='\0';
+	strncpy(ut.ut_line, ttyptr, sizeof(ut.ut_line)-1);
+	ut.ut_line[sizeof(ut.ut_line)-1]='\0';
 #ifdef USER_PROCESS
 	ut.ut_type=USER_PROCESS;
 	ut.ut_pid=getpid();
 #endif
 #if defined(HAVE_UTHOST)
 	/* remove_me() should be called before this function */
-	if ( utmp_saved )
-		strncpy(ut.ut_host, saved_utmp.ut_host, sizeof(ut.ut_host));
+	if ( utmp_saved ) {
+		strncpy(ut.ut_host, saved_utmp.ut_host, sizeof(ut.ut_host)-1);
+		ut.ut_host[sizeof(ut.ut_host)-1]='\0';
+	}
 #endif
 	(void) time(&ut.ut_time);
 

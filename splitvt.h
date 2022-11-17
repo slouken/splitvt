@@ -23,10 +23,11 @@ extern char	command_c, switch_c, quote_c;
 extern int	dologin;	/* Do the shells run as login shells? */
 
 /* The command to run in each window */
-extern char *upper_args[256], *lower_args[256];
+#define MAX_ARGS 0xff
+extern char *upper_args[MAX_ARGS+1], *lower_args[MAX_ARGS+1];
 
 /* The name of the startup file to parse */
-extern char *startupfile;	/* %s is replaced by $HOME */
+extern char *startupfile;
 
 /* The number of lines requested for the upper window (from vt100.c) */
 extern int UU_lines;

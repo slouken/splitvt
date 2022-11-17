@@ -11,7 +11,7 @@
 */
 
 static char *version=
-"@(#)Splitvt 1.6.4  6/3/2000  -Sam Lantinga   (slouken@devolution.com)\n";
+"@(#)Splitvt 1.6.5  1/12/2001  -Sam Lantinga   (slouken@devolution.com)\n";
 
 #include	<sys/types.h>
 #include	<sys/time.h>
@@ -76,7 +76,7 @@ char 	command_c=COMMAND,
 int     dologin=0;		/* Do the shells run as login shells? */
 
 /* The command to run in each window */
-char *upper_args[256]={NULL}, *lower_args[256]={NULL};
+char *upper_args[MAX_ARGS+1]={NULL}, *lower_args[MAX_ARGS+1]={NULL};
 int upper_empty=1, lower_empty=1;
 
 void print_usage(argv)
@@ -118,6 +118,13 @@ char *argv[];
 	struct event X_event;
 	int on_separator=0;
 
+	/* Are we called sanely? */
+	if ( argv == NULL || argv[0] == NULL ) {
+		fprintf(stderr, "%s is NULL! aborting.\n",
+			argv == NULL ? "argv" : "argv[0]");
+		exit(-1);
+	}
+
 #ifdef NEED_INET_H
         /* There is a bug in the Wallabong Group's implementation
            of select().  It will not work properly with fd 0 */
@@ -156,11 +163,12 @@ char *argv[];
 				  break;
 			case 'u': if ( strcmp(optarg, "pper") != 0 )
 					print_usage(argv[0]);
-				  tokenize(upper_args, argv[optind++], " ");
+				  tokenize(upper_args, MAX_ARGS+1,
+						  argv[optind++], " ");
 				  upper_empty=0;
 				  break;
 			case 'l': if ( strcmp(optarg, "ower") == 0 ) {
-				  	tokenize(lower_args, 
+				  	tokenize(lower_args, MAX_ARGS+1,
 							argv[optind++], " ");
 				  	lower_empty=0;
 				  } else if ( strcmp(optarg, "ogin") == 0 ) {
@@ -228,12 +236,12 @@ char *argv[];
 
 	if ( argv[1] ) {
 		if ( upper_empty ) {
-			for ( i=0; argv[i+1]; ++i )
+			for ( i=0; argv[i+1] && i<MAX_ARGS; ++i )
 				upper_args[i]=argv[i+1];
 			upper_args[i]=NULL;
 		}
 		if ( lower_empty ) {
-			for ( i=0; argv[i+1]; ++i )
+			for ( i=0; argv[i+1] && i<MAX_ARGS; ++i )
 				lower_args[i]=argv[i+1];
 			lower_args[i]=NULL;
 		}

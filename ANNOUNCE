@@ -1,4 +1,4 @@
-Subject: SECURITY: Announcing Splitvt 1.6.3
+Subject: SECURITY: Announcing Splitvt 1.6.5
 Newsgroups: alt.sources
 Summary: 
 Keywords: 
@@ -8,10 +8,10 @@ Announcing the newest version of splitvt!
 
 SECURITY ALERT!!!
 
-	splitvt versions lower than 1.6.4 are known to have a
+	splitvt versions lower than 1.6.5 are known to have a
 security hole allowing a user to gain ROOT access on some systems!
 
-	If you have a version lower than 1.6.4 _please_ remove
+	If you have a version lower than 1.6.5 _please_ remove
 the set-uid bit on your current version, and upgrade to the newer
 version as soon as possible.
 ("splitvt -version" will tell you what version you are running)
@@ -38,37 +38,6 @@ client-server applications or watching routine tasks as you work.
 	If you are using splitvt in a new and unusual way,
 I'd like to hear about it! 
 Direct all comments to slouken@devolution.com
-
-What's new?
-
-Here is the list of things from the CHANGES file:
-
-        Version 1.6.4
-                                Placed under the GNU General Public License
-                                Fixed scroll region reset on exit
-                                Fixed a comparison of unsigned char with EOF
-                                Patched some security holes:
-                                        fixed buffer overflow in lock.c
-                                Added "make install" target (/usr/local/bin)
-
-----
-
-What's planned?
-
-	I want to beef up the startup file syntax so that you can
-specify the format of the "status bar", or window divider, and I plan
-to rewrite the startup file parser so that it allows you to use more
-flexible and powerful startup scripts.  I am also toying with the idea
-of cut-paste "screen" style, and a window history that you can scroll
-back through.  I have cut-paste partially working.
-Other things on the pot are cleaning up dead windows, dynamically starting
-new windows, etc...
-	If you have any wishes, just let me know at slouken@cs.ucdavis.edu,
-and I'll try to include them in future releases of splitvt.  I'll try to 
-avoid feeping creaturism, but a few bells and whistles would be nice. :)
-
-Note: At the moment I have several other projects, and have this one on
-      unspecified hold.  This release was mainly to fix some security holes.
 
 Will it run on my system?
 

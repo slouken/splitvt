@@ -11,10 +11,12 @@
 #include <ctype.h>
 #include "splitvt.h"
 
+#define SPLITVTRC "/.splitvtrc"
+
 extern char *myputenv();  /* Portable setenv() function in misc.c */
 
 /* These are used only here in this file. */
-char *startupfile="%s/.splitvtrc";	/* %s is replaced by $HOME */
+char *startupfile=NULL;
 char *rcfile_buf;
 
 static int lineno=0;	/* The current line in the startup file */
@@ -110,7 +112,7 @@ char *args[];
 	}
 	if ( (*args[1] == '-') && (strlen(args[1]) > 1) ) {
 		if ( strcmp(&args[1][1], "upper") == 0 ) {
-			for ( i=2; args[i]; ++i ) {
+			for ( i=2; args[i] && i-2 < MAX_ARGS; ++i ) {
 				if ( (upper_args[i-2]=
 				(char *)malloc(strlen(args[i])+1)) == NULL ) {
 					perror("malloc");
@@ -120,7 +122,7 @@ char *args[];
 			}
 			upper_args[i-2]=NULL;
 		} else if ( strcmp(&args[1][1], "lower") == 0 ) {
-			for ( i=2; args[i]; ++i ) {
+			for ( i=2; args[i] && i-2 < MAX_ARGS; ++i ) {
 				if ( (lower_args[i-2]=
 				(char *)malloc(strlen(args[i])+1)) == NULL ) {
 					perror("malloc");
@@ -135,7 +137,7 @@ char *args[];
 	}
 
 	/* Straight command line for both upper and lower windows */
-	for ( i=1; args[i]; ++i ) {
+	for ( i=1; args[i] && i-1 < MAX_ARGS; ++i ) {
 			if ( ((upper_args[i-1]=(char *)malloc(strlen(args[i])+1)) == NULL) ||
 			     ((lower_args[i-1]=(char *)malloc(strlen(args[i])+1)) == NULL) ) {
 				perror("malloc");
@@ -225,17 +227,28 @@ void splitvtrc()
 		}
 	}
 
-	if ( (rcfile_buf=(char *)malloc(strlen(startupfile)-2+strlen(home)+1))
-								== NULL ) {
-		/* Maybe warn of malloc() error? */
-		return;
+	/* Create the startup filename */
+	if ( startupfile == NULL ) {
+		rcfile_buf=(char *)malloc(strlen(home)+sizeof(SPLITVTRC));
+		if ( rcfile_buf == NULL ) {
+			/* Maybe warn of malloc() error? */
+			return;
+		}
+		strcpy(rcfile_buf, home);
+		strcat(rcfile_buf, SPLITVTRC);
+	} else {
+		rcfile_buf=(char *)malloc(strlen(startupfile)+1);
+		if ( rcfile_buf == NULL ) {
+			/* Maybe warn of malloc() error? */
+			return;
+		}
+		strcpy(rcfile_buf, startupfile);
 	}
 
 	/* Since we're root, we need to do some security checking on
 	   the file we're opening.  It must either be owned by the 
 	   user calling us, or be world-readable.
 	*/
-	sprintf(rcfile_buf, startupfile, home);
 	if ( (rcfd=open(rcfile_buf, O_RDONLY, 0)) < 0 ) {
 		/* No worries, just ignore startup file */
 		return;

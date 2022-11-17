@@ -146,7 +146,8 @@ int get_master_pty()
 
 	char 	*ttyptr;
 
-	if ( (ttyptr=_getpty(&master_fd, O_RDWR, 0600, 0)) == 0 )
+	ttyptr=_getpty(&master_fd, O_RDWR, 0600, 0);
+	if ( ttyptr == NULL || strlen(ttyptr)+1 > sizeof(tty_name) )
 		return(-1);
 	else
 		strcpy(tty_name, ttyptr);
@@ -181,9 +182,11 @@ int get_slave_pty()
 #else /* ! IRIX */
 
 
-#ifdef SOLARIS		/* System V.4 pty routines from W. Richard Stevens */
+#if defined(SOLARIS) || defined(linux)		/* System V.4 pty routines from W. Richard Stevens */
 
+#ifdef SOLARIS
 #include <stropts.h>
+#endif
 
 #define DEV_CLONE	"/dev/ptmx"
 
@@ -212,7 +215,8 @@ int get_master_pty()
 		return(-1);
 	}
 
-	if ( (ttyptr=ptsname(master_fd)) == NULL )
+	ttyptr=ptsname(master_fd);
+	if ( ttyptr == NULL || strlen(ttyptr)+1 > sizeof(tty_name) )
 	{
 		close(master_fd);
 		return(-1);
@@ -240,6 +244,7 @@ int get_slave_pty()
 		return(-1);
 	}
 
+#ifdef SOLARIS
 	if ( ioctl(slave_fd, I_PUSH, "ptem") < 0 )
 	{
 		close(master_fd);
@@ -260,6 +265,7 @@ int get_slave_pty()
 		close(slave_fd);
 		return(-1);
 	}
+#endif
 
 	return(slave_fd);
 }
@@ -359,7 +365,7 @@ int get_slave_pty()
 	return(slave_fd);
 }
 
-#endif  /* if SOLARIS */
+#endif  /* if linux or SOLARIS */
 #endif  /* if IRIX */
 
 
@@ -751,15 +757,16 @@ char *tokens;
 
 /* This version of tokenize is destructive to the line it parses. */
 
-void tokenize(array, line, tokens)
+void tokenize(array, size, line, tokens)
 char *array[];
+int size;
 char *line;
 char *tokens;
 {
 	char *head, *ptr;
 	int i=0;
 
-	for ( head=line; *line; ) {
+	for ( head=line; *line && i < size-2; ) {
 		if ( istoken(*line, tokens) ) {
 			*(line++)='\0';
 			array[i++]=head;
@@ -795,7 +802,7 @@ int secure;
 		return(NULL);
 	strcpy(newpath, path);
 
-	tokenize(paths, newpath, ":");
+	tokenize(paths, 256, newpath, ":");
 	for ( i=0; paths[i]; ++i ) {
 		if ( secure && paths[i][0] != '/' ) {
 			/* Only allow full pathnames */

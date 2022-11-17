@@ -1,8 +1,9 @@
-
 #!/bin/sh
 #  Script to auto-configure splitvt.		-Sam Lantinga
 
 QUIET="-v"
+# use $CC if set, else set it to cc
+: ${CC:=cc}
 CFLAGS=
 MAKE="echo \"Done.  Type 'make' to build\"" 
 
@@ -23,7 +24,7 @@ while [ $# -gt 0 ]
      esac
 done
 
-cc $CFLAGS -o config config.c
+$CC $CFLAGS -o config config.c
 if [ -f config ]; then
 	if ./config $QUIET
 	  then eval $MAKE

@@ -81,7 +81,7 @@ end:
 /* If this function returns 0, no selection was made */
 
 static char *extract_sel(win, buf, len, mark1, mark2)
-int win;
+window *win;
 char *buf;
 int len;
 position *mark1, *mark2;
@@ -212,18 +212,18 @@ void vt_initsel()
 		use_xcb=0;
 }
 
-static char selbuf[4096];
+static char selbuf[BUFSIZ];
 char *vt_getselbuf()
 {
 	FILE *safe_popen();		/* From misc.c */
 	FILE *xcb;
-	char buffer[4096];
+	char buffer[BUFSIZ];
 	int len;
 
 	if ( use_xcb ) {
 		if ( (xcb=safe_popen("xcb -S 0 && xcb -p 0", "r")) == NULL )
 			return(selbuf);
-		len=fread(buffer, sizeof(char), 4095, xcb);
+		len=fread(buffer, sizeof(char), BUFSIZ-1, xcb);
 		(void) safe_pclose(xcb);
 
 		if ( len > 0 ) {
@@ -239,7 +239,8 @@ char *buffer;
 	FILE *safe_popen();		/* From misc.c */
 	FILE *xcb;
 	
-	strncpy(selbuf, buffer, 4095);
+	strncpy(selbuf, buffer, BUFSIZ-1);
+	selbuf[BUFSIZ-1]='\0';
 	if (use_xcb && (xcb=safe_popen("xcb -s 0; xcb -RT 0", "w")) != NULL) {
 		(void) fwrite(selbuf, sizeof(char), strlen(selbuf), xcb);
 		(void) safe_pclose(xcb);

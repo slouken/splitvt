@@ -236,9 +236,12 @@ char *argv[];
 	fprintf(makefile, "\t$(CC) -o $@ $(OBJS) $(LIBS)\n");
 #endif
 	fprintf(makefile, "\nclean: \n\trm -f *.o core \n");
-	fprintf(makefile, "\nclobber: clean\n\trm -f splitvt Makefile\n");
-	fprintf(makefile, "\ninstall: \n\tmv splitvt /usr/local/bin/splitvt\n");
+	fprintf(makefile, "\ndistclean: clean\n\trm -f splitvt Makefile\n");
+	fprintf(makefile, "\ninstall: install-man\n");
+	fprintf(makefile, "\tmv splitvt /usr/local/bin/splitvt\n");
 	fprintf(makefile, "\tmv examples/xsplitvt /usr/local/bin/xsplitvt\n");
+	fprintf(makefile, "\ninstall-man:\n");
+	fprintf(makefile, "\tcp splitvt.man /usr/local/man/man1/splitvt.1\n");
 
 	fclose(makefile);
 	exit(0);

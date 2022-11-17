@@ -19,7 +19,7 @@
 
 struct event {
 	int happening;
-	char button_state;
+	unsigned char button_state;
 	unsigned int x;
 	unsigned int y;
 #ifdef REPORT_SELECTION
