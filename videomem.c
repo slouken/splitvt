@@ -13,9 +13,7 @@
    memory is not freed if the function fails.
  */
 
-int **alloc_video(rows, cols)
-int rows;
-int cols;
+int **alloc_video(int rows, int cols)
 {
 	int **videomem;
 	int i, j;
@@ -36,12 +34,7 @@ int cols;
 
 /* This function copies an existing window to a new buffer, 
    truncating lines if necessary, and translates the cursor position  */
-void copy_video(win, newarea, rows, cols, newcursor)
-window *win;
-int **newarea;
-int rows;
-int cols;
-position *newcursor;
+void copy_video(window *win, int **newarea, int rows, int cols, position *newcursor)
 {
 	int i, j, ni, nj;
 
@@ -61,9 +54,7 @@ position *newcursor;
 }
 
 /* This function adds a character to the video memory at the cursor position */
-void add_video(win, c)
-window *win;
-char c;
+void add_video(window *win, char c)
 {
 	win->videomem[win->cursor.x - 1][win->cursor.y - 1] = (int)c;
 	win->videomem[win->cursor.x - 1][win->cursor.y - 1] |= 
@@ -71,18 +62,13 @@ char c;
 }
 
 /* This function returns a character from video at a specific position */
-int get_video(win, x, y)
-window *win;
-int x, y;
+int get_video(window *win, int x, int y)
 {
 	return(win->videomem[x-1][y-1]);
 }
 
 /* This function sets a character position in video memory */
-void put_video(c, win, x, y)
-int c;
-window *win;
-int x, y;
+void put_video(int c, window *win, int x, int y)
 {
 	win->videomem[x-1][y-1]=c;
 }
@@ -90,9 +76,7 @@ int x, y;
 /* This function returns the array index of the end of the specified line
    in the specified window.  lineno should start as 1 for the first line.
 */
-static int video_eol(win, lineno)
-window *win;
-int lineno;
+static int video_eol(window *win, int lineno)
 {
 	int eol=(-1), j;
 
@@ -108,12 +92,7 @@ int lineno;
 /* x1 is the first line, x2 is the second line, y1 is the y on the first
    line, and y2 is the y on the last line.
 */
-void getsel_video(win, buf, maxlen, x1, x2, y1, y2)
-window *win;
-char *buf;
-int maxlen;
-int x1, x2;
-int y1, y2;
+void getsel_video(window *win, char *buf, int maxlen, int x1, int x2, int y1, int y2)
 {
 	int l=0, i, j, eol, eos=0;
 
@@ -144,8 +123,7 @@ int y1, y2;
 }
 
 /* This function clears the SELECTED bit in a whole window */
-void clrsel_video(win)
-window *win;
+void clrsel_video(window *win)
 {
 	int i, j;
 
@@ -158,10 +136,7 @@ window *win;
 }
 
 /* This function erases a specified section of video memory */
-void erase_video(win, x1, x2, y1, y2)
-window *win;
-int x1, x2;
-int y1, y2;
+void erase_video(window *win, int x1, int x2, int y1, int y2)
 {
 	int i, j;
 
@@ -173,9 +148,7 @@ int y1, y2;
 }
 
 /* This function "scrolls" video memory forward */
-void scroll_video(win, numlines)
-window *win;
-int numlines;
+void scroll_video(window *win, int numlines)
 {
 	int i, n, *tmp;
 
@@ -200,9 +173,7 @@ int numlines;
 }
 
 /* This function "scrolls" video memory backward */
-void revscroll_video(win, numlines)
-window *win;
-int numlines;
+void revscroll_video(window *win, int numlines)
 {
 	int i, n, *tmp;
 
@@ -227,9 +198,7 @@ int numlines;
 }
 
 /* This function inserts nulls in a line, shifting everything right */
-void rshift_video(win, numcols)
-window *win;
-int numcols;
+void rshift_video(window *win, int numcols)
 {
 	int i;
 
@@ -242,10 +211,7 @@ int numcols;
 	}
 }
 
-int check_attr(pixel, lastattr, currattr)
-int pixel;
-int lastattr;
-unsigned char *currattr;
+int check_attr(int pixel, int lastattr, unsigned char *currattr)
 {
 	unsigned char simplepixel, lastpixel;
 	unsigned char change;
@@ -318,8 +284,7 @@ checkchange:
 	return(pixel);
 }
 
-void paint_video(win)
-window *win;
+void paint_video(window *win)
 {
 	unsigned char on=NORMAL;
 	int i, j, oldattr=0;

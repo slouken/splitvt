@@ -22,12 +22,7 @@ extern struct physical physical;
 static int lastdirection=0;
 
 /* This function assumes that it alone will print selected text */
-static void put_sel_char(win, x, y, oldattr, on, direction)
-window *win;
-int x, y;
-int *oldattr;
-unsigned char *on;
-int direction;
+static void put_sel_char(window *win, int x, int y, int *oldattr, unsigned char *on, int direction)
 {
 	int c, selected=0;
 
@@ -84,11 +79,7 @@ end:
 
 /* If this function returns 0, no selection was made */
 
-static char *extract_sel(win, buf, len, mark1, mark2)
-window *win;
-char *buf;
-int len;
-position *mark1, *mark2;
+static char *extract_sel(window *win, char *buf, int len, position *mark1, position *mark2)
 {
 	position startsel, endsel;
 
@@ -123,9 +114,7 @@ position *mark1, *mark2;
 	return(buf);
 }
 
-static void line_down(win, cursor)
-window *win;
-position *cursor;
+static void line_down(window *win, position *cursor)
 {
 	int j;
 
@@ -147,9 +136,7 @@ position *cursor;
 	}
 }
 
-static void line_up(win, cursor)
-window *win;
-position *cursor;
+static void line_up(window *win, position *cursor)
 {
 	int j;
 
@@ -173,9 +160,7 @@ position *cursor;
 	}
 }
 
-static void move_left(win, cursor)
-window *win;
-position *cursor;
+static void move_left(window *win, position *cursor)
 {
 	if ( cursor->y > 1 ) {
 		if ( marked ) {
@@ -186,9 +171,7 @@ position *cursor;
 	}
 }
 
-static void move_right(win, cursor)
-window *win;
-position *cursor;
+static void move_right(window *win, position *cursor)
 {
 	if ( cursor->y < win->cols ) {
 		if ( marked )
@@ -200,9 +183,9 @@ position *cursor;
 }
 
 static int use_xcb=0;	/* Do we use xcb to access X selection buffers? */
-void vt_initsel()
+void vt_initsel(void)
 {
-	extern char *pathsearch();	/* From misc.c */
+	extern char *pathsearch(char *command, int secure);	/* From misc.c */
 
 #ifdef USE_XCB
 	char *display;
@@ -216,9 +199,9 @@ void vt_initsel()
 }
 
 static char selbuf[BUFSIZ];
-char *vt_getselbuf()
+char *vt_getselbuf(void)
 {
-	FILE *safe_popen();		/* From misc.c */
+	FILE *safe_popen(char *command, char *type); /* From misc.c */
 	FILE *xcb;
 	char buffer[BUFSIZ];
 	int len;
@@ -236,10 +219,9 @@ char *vt_getselbuf()
 	}
 	return(selbuf);
 }
-char *vt_setselbuf(buffer)
-char *buffer;
+char *vt_setselbuf(char *buffer)
 {
-	FILE *safe_popen();		/* From misc.c */
+	FILE *safe_popen(char *command, char *type);		/* From misc.c */
 	FILE *xcb;
 	
 	strncpy(selbuf, buffer, BUFSIZ-1);
@@ -252,10 +234,7 @@ char *buffer;
 }
 
 /* Get a window selection */
-char *vt_getsel(win, buf, len)
-int win;
-char *buf;
-int len;
+char *vt_getsel(int win, char *buf, int len)
 {
 	int c;
 	position here, cursor, mark1, mark2;
@@ -319,11 +298,7 @@ int len;
 
 
 /* Set a window selection */
-char *vt_setsel(buf, len, startx, endx, starty, endy)
-char *buf;
-int len;
-int startx, starty;
-int endx, endy;
+char *vt_setsel(char *buf, int len, int startx, int endx, int starty, int endy)
 {
 	window *thiswin;
 

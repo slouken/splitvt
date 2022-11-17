@@ -29,8 +29,7 @@ extern void (*do_input)(), normal_input();
 /* Since this function is called as an input function, we need to handle
    all state here. 
 */
-void lock_screen(c)
-char c;
+void lock_screen(char c)
 {
 	char message[512];
 

@@ -58,15 +58,15 @@ static char upper_tty[64]={'\0'};	/* tty_name of the upper window */
 static char lower_tty[64]={'\0'};	/* tty_name of the lower window */	
 static struct passwd *pw=NULL;		/* Our passwd entry pointer */
 
-static void finish(), move_bar(), winch();
-extern void lock_screen();		/* From lock.c */
-void normal_input();
-static int  insert_dash();
-static int  isalive();
-char extract();
-void splitvtrc();
+static void finish(int sig), move_bar(int howfar), winch(int sig);
+extern void lock_screen(char c);		/* From lock.c */
+void normal_input(char c);
+static int  insert_dash(char *args[]);
+static int  isalive(void);
+char extract(char *arg);
+void splitvtrc(void);
 
-void (*do_input)() = normal_input;
+void (*do_input)(int c) = (void(*)())normal_input;
 
 static char selection[BUFSIZ];		/* Screen selection buffer */
 
@@ -89,8 +89,7 @@ int upper_empty=1, lower_empty=1;
 
 int force_height=0;
 
-void print_usage(argv)
-char *argv;
+void print_usage(char *argv)
 {
 	fprintf(stderr, "\nUsage: %s [options] [shell]\n\n", argv);
 	fprintf(stderr, "Options:\n");
@@ -113,9 +112,7 @@ char *argv;
 }
 
  
-int main(argc, argv)
-int argc;
-char *argv[];
+int main(int argc, char *argv[])
 {
 	extern int errno, optind;
 	extern char *optarg;
@@ -508,15 +505,14 @@ char *argv[];
 	exit(0);
 }
 
-void reset_bar(sleeptime)
-int sleeptime;
+void reset_bar(int sleeptime)
 {
 	sleep(sleeptime);
 	vt_info(NULL);
 }
 
 /* Print out a help screen for the escapes */
-void print_help()
+void print_help(void)
 {
 	static char *help[] = {
 "Escape commands: ", 
@@ -535,8 +531,7 @@ NULL
 	vt_showscreen("Splitvt HELP screen:", help);
 }
 
-void normal_input(c)
-char c;
+void normal_input(char c)
 {
 	char message[BUFSIZ];
 	int pid;
@@ -592,7 +587,7 @@ promptch:
 				  break;
 			/* Lock the screen */
 			case 'x': vt_info("Enter password: ");
-				  do_input=lock_screen;
+				  do_input=(void(*)())lock_screen;
 				  break;
 			/* Repaint the screen */
 			case 'r': vt_redraw();
@@ -629,7 +624,7 @@ promptch:
 /* A better child checker. :)  It gathers the status of the child,
    rendering it free and un-zombied. :) */
 
-static int isalive()
+static int isalive(void)
 {
 	int status;
 
@@ -706,8 +701,7 @@ static int isalive()
 
 	
 /* Cleanup routine */
-static void finish(sig)
-int sig;
+static void finish(int sig)
 {
 	/* Only call this routine after tty_getmode() has been called */
 	/* The tty_reset() call flushes the tty's input buffers. */
@@ -733,8 +727,7 @@ int sig;
    init_vt100() properly refreshes the screen (we hope) ;-)
 */
 
-static void move_bar(howfar)
-int howfar;
+static void move_bar(int howfar)
 {
 	int tmp_uulines;
 
@@ -760,8 +753,7 @@ int howfar;
    Ah hah!  As of 1.6.0, the window is refreshed. :)
  */
 
-static void winch(sig)
-int sig;
+static void winch(int sig)
 {
 	char *ptr;
 
@@ -778,8 +770,7 @@ int sig;
 		pty_setwin(bottomfd, LOWER);
 }
 
-static int insert_dash(args)
-char *args[];
+static int insert_dash(char *args[])
 {
 	char *temp;
 

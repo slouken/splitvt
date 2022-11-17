@@ -44,8 +44,9 @@ static char terminal_type[BUFSIZ];	/* Our terminal type */
 static char *sep;	        	/* The window separator string */
 
 /* The various output processing functions, based on state */
-void scan_for_esc();
-void E_(), E_brac(), E_brac_Q(), E_lparen(), E_rparen(), E_pound();
+void scan_for_esc(int c, int *source);
+void E_(int c, int *source), E_brac(int c, int *source), E_brac_Q(int c, int *source),
+	E_lparen(int c, int *source), E_rparen(int c, int *source), E_pound(int c, int *source);
 
 /* Make these four variables accessable to the calling program */
 int UU_lines=0;         /* The user requested lines for the upper window */
@@ -57,8 +58,7 @@ static int LU_lines;    /* A local copy of UU_lines that is modified */
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /* Reset the escape scanning sequence: */
-static void reset_escape(win)
-window *win;
+static void reset_escape(window *win)
 {
 	int i;
 
@@ -68,13 +68,12 @@ window *win;
 	win->param_idx=0;
 	win->cur_param=(&win->esc_param[win->param_idx]);
 }
-static void reset_esc()
+static void reset_esc(void)
 {
 	reset_escape(curwin);
 }
 /* Initialize a window structure: */
-static void vt_resetwin(win)
-window *win;
+static void vt_resetwin(window *win)
 {
 	win->cursor.x=1;
 	win->cursor.y=1;
@@ -93,8 +92,7 @@ window *win;
 	reset_escape(win);
 }
 /* Check to make sure the window cursor values are sane. */
-static void vt_checkwin(win)
-window *win;
+static void vt_checkwin(window *win)
 {
 	if ( win->cursor.x > win->rows )
 		win->cursor.x=win->rows;
@@ -105,8 +103,7 @@ window *win;
 }
 /* Set the current window: */
 static int lastwin = (-1);
-void set_win(which)
-int which;
+void set_win(int which)
 {
 	window *other;
 	int i;
@@ -137,8 +134,7 @@ int which;
 
 /* Set the terminal attributes to those of the specified window */
 /* This must be called _after_ vt_restcursor(), or it won't work */
-static void set_attr(win)
-window *win;
+static void set_attr(window *win)
 {
 	unsigned char on=NORMAL;
 
@@ -148,9 +144,7 @@ window *win;
 
 /* Process the ^[[X;Xm escape.  Made into a separate routine to support
    ansi color. */
-static void process_m(win, n)
-window *win;
-int n;
+static void process_m(window *win, int n)
 {
 	switch (n) {
 		case 0:	/* Turn all attributes off */
@@ -220,9 +214,7 @@ int n;
 	}
 }
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-void scan_for_esc(c, source)
-int c;
-int *source;
+void scan_for_esc(int c, int *source)
 {
 	int i;
 
@@ -290,9 +282,7 @@ int *source;
 	}
 	return;
 }
-void E_(c, source)
-int c;
-int *source;
+void E_(int c, int *source)
 {
 	/* Return inside the switch to prevent reset_esc() */
 	switch (c) {
@@ -373,9 +363,7 @@ int *source;
 	}
 	reset_esc();
 }
-void E_brac(c, source)
-int c;
-int *source;
+void E_brac(int c, int *source)
 {
 	int newx, newy, i;
 	char reply[128];
@@ -664,9 +652,7 @@ int *source;
 	}
 	reset_esc();
 }
-void E_brac_Q(c, source)
-int c;
-int *source;
+void E_brac_Q(int c, int *source)
 {
 	/* Check for numeric argument first */
 	if ( isdigit(c) ) {
@@ -769,9 +755,7 @@ int *source;
 	}
 	reset_esc();
 }
-void E_lparen(c, source)
-int c;
-int *source;
+void E_lparen(int c, int *source)
 {
 	/* Return inside the switch to prevent reset_esc() */
 	switch (c) {
@@ -798,9 +782,7 @@ int *source;
 	}
 	reset_esc();
 }
-void E_rparen(c, source)
-int c;
-int *source;
+void E_rparen(int c, int *source)
 {
 	/* Return inside the switch to prevent reset_esc() */
 	switch (c) {
@@ -826,9 +808,7 @@ int *source;
 	}
 	reset_esc();
 }
-void E_pound(c, source)
-int c;
-int *source;
+void E_pound(int c, int *source)
 {
 	switch (c) {   /* Line attributes not supported */
 		case '3':	/* Double height (top half) */
@@ -848,8 +828,7 @@ int *source;
 
 static int setup_vt100 = 0;	/* Have we initialized the vt100 system? */
 
-char *init_vt100(reread_tsize)
-int reread_tsize;
+char *init_vt100(int reread_tsize)
 {
 #ifdef TIOCGWINSZ
 	struct /* winsize */ {
@@ -1015,11 +994,11 @@ int reread_tsize;
 	return(NULL);
 }
 
-int vt_write(win, data, len, source)
-int win;		/* The window; 0 if top, 1 if bottom */
-char *data;		/* The data to write */
-int len;		/* The amount of data to write */
-int *source;		/* File descriptor through which to reply to Esc-Z */
+int vt_write(int win, char *data, int len, int *source)
+/*int win;		 The window; 0 if top, 1 if bottom
+char *data;		 The data to write
+int len;		 The amount of data to write
+int *source;		 File descriptor through which to reply to Esc-Z */
 {
 	int i;
 
@@ -1028,7 +1007,7 @@ int *source;		/* File descriptor through which to reply to Esc-Z */
 
 	/* Now cycle through the input */
 	for ( i=0; i<len; ++i )
-		(*curwin->process_char)((int)*(data++), source);
+
 	vt_update();
 	return len;
 }
@@ -1037,8 +1016,7 @@ int *source;		/* File descriptor through which to reply to Esc-Z */
    return it.  (Assume a one line prompt)
 */
 
-char vt_prompt(prompt)
-char *prompt;
+char vt_prompt(char *prompt)
 {
 	char format[BUFSIZ], buff[1];
 
@@ -1073,8 +1051,7 @@ char *prompt;
 
 /* Print out information at the bottom of the screen */
 
-void vt_info(info)
-char *info;
+void vt_info(char *info)
 {
 	char format[80];
 
@@ -1101,7 +1078,7 @@ char *info;
 }
 
 /* Repaint both of the screens */
-void vt_redraw()
+void vt_redraw(void)
 {
 	/* We need to paint current window last so scrolling works */
 	vt_clrscr();
@@ -1114,9 +1091,7 @@ void vt_redraw()
 }
 
 /* Show a (help) screen, wait, then refresh the screen */
-void vt_showscreen(title, text)
-char *title;
-char *text[];
+void vt_showscreen(char *title, char *text[])
 {
 	int i;
 
@@ -1138,7 +1113,7 @@ char *text[];
 }
 
 /* Clean up the screen and clear the scrolling regions */
-void end_vt100()
+void end_vt100(void)
 {
 	int i;
 

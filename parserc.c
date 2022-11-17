@@ -16,7 +16,7 @@
 
 #define SPLITVTRC "/.splitvtrc"
 
-extern char *myputenv();  /* Portable setenv() function in misc.c */
+extern char *myputenv(char *string);  /* Portable setenv() function in misc.c */
 
 /* These are used only here in this file. */
 char *startupfile=NULL;
@@ -25,16 +25,14 @@ char *rcfile_buf;
 static int lineno=0;	/* The current line in the startup file */
 
 
-static void warn(message)
-char *message;
+static void warn(char *message)
 {
 	fprintf(stderr, "Warning in %s, line %d\n", rcfile_buf, lineno);
 	fprintf(stderr, "\t%s\n", message);
 	sleep(2);
 }
 
-static char extract(arg)	/* get a char from x/^x format */
-char *arg;
+static char extract(char *arg)	/* get a char from x/^x format */
 {
 	if ( ! *arg ) {
 		warn("Couldn't extract control character");
@@ -54,8 +52,7 @@ char *arg;
 }
 
 
-static void set_something(args)
-char *args[];
+static void set_something(char *args[])
 {
 	int i;
 
@@ -113,8 +110,7 @@ char *args[];
 		warn("Invalid parameter to 'set'");
 }
 
-static void set_argv(args)
-char *args[];
+static void set_argv(char *args[])
 {
 	int i;
 
@@ -165,8 +161,7 @@ char *args[];
 /* Um, some security routines --
 	Note: if these are truly secure, they can be freely re-used elsewhere.
 */
-static int safe_chdir(directory)
-char *directory;
+static int safe_chdir(char *directory)
 {
 	extern int errno;
 
@@ -215,7 +210,7 @@ char *directory;
 
 
 /* The main cazunga, the reason we are here at all... */
-void splitvtrc()
+void splitvtrc(void)
 {
 	struct passwd *pwd;
 	char *home;

@@ -29,7 +29,7 @@ static struct utmp saved_utmp;
 static int utmp_saved=0;
 static char saved_tty[128];
 
-int remove_me()
+int remove_me(void)
 {
 	struct utmp ut;
 	char *tty;
@@ -66,16 +66,14 @@ int remove_me()
 }
 
 
-int replace_me()
+int replace_me(void)
 {
 	if ( utmp_saved )
 		return(set_utmp(saved_tty, &saved_utmp));
 	return(0);
 }
 	
-int get_utmp(tty, save)
-char *tty;
-struct utmp *save;
+int get_utmp(char *tty, struct utmp *save)
 {
 	int fd;
 	char *ttyptr;
@@ -110,9 +108,7 @@ struct utmp *save;
 	return(-1);
 }
 
-int set_utmp(tty, save)
-char *tty;
-struct utmp *save;
+int set_utmp(char *tty, struct utmp *save)
 {
 	int fd, found=0;
 	char *ttyptr;
@@ -159,10 +155,10 @@ struct utmp *save;
 	
 /* Set up a utmp entry and tty for a user */
 
-int addutmp(user, uid, tty)
-char *user;		/* The user to add to the utmp file */
-int uid;		/* The uid corresponding to user */
-char *tty;		/* /dev/ttyxx */
+int addutmp(char *user, int uid, char *tty)
+/*char *user;		/* The user to add to the utmp file */
+/*int uid;		/* The uid corresponding to user */
+/*char *tty;		/* /dev/ttyxx */
 {
 #if !defined(SOLARIS) && !defined(IRIX) && !defined(__GLIBC__)
 	struct stat sb;
@@ -240,9 +236,8 @@ char *tty;		/* /dev/ttyxx */
 
 /* End a utmp entry and tty for a user and a tty */
 
-int delutmp(user, tty)
-char *user;
-char *tty;		/* /dev/ttyxx */
+int delutmp(char *user, char *tty)
+/*char *tty;		/* /dev/ttyxx */
 {
 	struct stat sb;
 	struct utmp ut;

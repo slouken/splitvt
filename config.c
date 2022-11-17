@@ -4,6 +4,7 @@
 #include	<signal.h>
 #include	<stdlib.h>
 #include	<string.h>
+#include    <unistd.h>
 
 /*#define DEBUG		/* Provides extra debugging info */
 
@@ -14,9 +15,9 @@
 #define W_OK	2
 #define R_OK	4
 
-int exists(dir, file)
-char *dir;
-char *file;
+int grep(char *dir, char *file, char *word);
+
+int exists(char *dir, char *file)
 {
 	struct stat statbuf;
 	char buffer[BUFSIZ];
@@ -47,9 +48,7 @@ char *deblibmultiarch;
    strcat(deblibmultiarch, "/");
 }
 
-main(argc, argv)
-int argc;
-char *argv[];
+int main(int argc, char *argv[])
 {
 	int  irix=0, solaris=0, verbose=0, write_utmp;
 	char cflags[BUFSIZ], ldflags[BUFSIZ];
@@ -285,10 +284,7 @@ char *argv[];
 
 /* Yeesh.  I have to write a word grep function.... */
 
-int grep(dir, file, word)
-char *dir;
-char *file;
-char *word;
+int grep(char *dir, char *file, char *word)
 {
 	FILE *fp;
 	char *wptr, *ptr, buffer[BUFSIZ];

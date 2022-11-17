@@ -36,7 +36,7 @@ extern int UU_lines;
 extern int stbottom;
 
 /* Functions exported from splitvt.c */
-extern void reset_bar();
+extern void reset_bar(int sleeptime);
 
 /* If set, allow resizing to less than 3 lines */
 extern int force_height;

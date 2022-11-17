@@ -55,15 +55,13 @@ extern int WU_lines, WL_lines, W_columns;	/* From vt100.c */
 #define UPPER	0		/* Upper window definition */
 #define LOWER	1		/* Lower window definition */
 
-int pty_open(argv, childpid, win)
-char *argv[];
-int *childpid;
-int win;		/* 0 for upper, 1 for lower */
+int pty_open(char *argv[], int *childpid, int win)
+/* 0 for upper, 1 for lower */
 {
 
-	void dropctty(), pty_setwin();
+	void dropctty(), pty_setwin(int fd, int win);
 	int get_master_pty(), get_slave_pty();
-	char *get_ttyname(), *myputenv();
+	char *get_ttyname(), *myputenv(char *string);
 
 #ifndef TIOCGWINSZ
 	char LINES[12], COLUMNS[12];
@@ -162,7 +160,7 @@ int master_fd;
 char tty_name[64]={'\0'};
 char pty_name[64]={'\0'};
 
-char *get_ttyname()
+char *get_ttyname(void)
 {
 	if ( tty_name[0] )
 		return(tty_name);
@@ -171,9 +169,9 @@ char *get_ttyname()
 
 #ifdef IRIX	/* IRIX System V for SGI machines */
 
-extern char *_getpty();
+extern char *_getpty(void);
 
-int get_master_pty()
+int get_master_pty(void)
 {
 
 	char 	*ttyptr;
@@ -191,7 +189,7 @@ int get_master_pty()
  * Open the slave half of a pseudo-terminal.
  */
 
-int get_slave_pty()
+int get_slave_pty(void)
 {
 	int	slave_fd;
 	char	*slavename;
@@ -223,9 +221,9 @@ int get_slave_pty()
 
 #endif
 
-extern char *ptsname();
+extern char *ptsname (int __fd);
 
-int get_master_pty()
+int get_master_pty(void)
 {
 
 	char 	*ttyptr;
@@ -269,7 +267,7 @@ int get_master_pty()
  * Open the slave half of a pseudo-terminal.
  */
 
-int get_slave_pty()
+int get_slave_pty(void)
 {
 	int	slave_fd;
 	char	*slavename;
@@ -320,13 +318,13 @@ int get_slave_pty()
 
 jmp_buf next;
 
-void trynext()
+void trynext(void)
 {
 	longjmp(next, 2);
 }
 
 
-int get_master_pty()
+int get_master_pty(void)
 {
 	int i, master_fd;
 	char *ptr;
@@ -391,7 +389,7 @@ int get_master_pty()
 
 /* Open the slave half of a pseudo-terminal. */
 
-int get_slave_pty()
+int get_slave_pty(void)
 {
 	int slave_fd;
 
@@ -412,16 +410,12 @@ int get_slave_pty()
      Thanks!
 */
 
-void d_copy(src, dst, len)
-    register char *src, *dst;
-    register int len;
+void d_copy(register char *src, register char *dst, register int len)
     {
 	while (--len >= 0) *dst++ = *src++;
     }
 
-void d_zero(dst, len)
-    register char *dst;
-    register int len;
+void d_zero(register char *dst, register int len)
     {
 	while (--len >= 0) *dst++ = 0;
     }
@@ -472,8 +466,7 @@ void dropctty()
 struct termio tty_mode;  /* Save tty mode here */
 static int tty_init=0;
 
-int tty_getmode(fd)
-int fd;
+int tty_getmode(int fd)
 {
 	d_zero((char *)&tty_mode, sizeof(struct termio));
 	tty_init=1;	/* Flag: we have initialized the tty_mode struct */
@@ -503,8 +496,7 @@ int fd;
 
 /* Set a tty to a sane mode */
 
-int tty_sane(fd)
-int fd;
+int tty_sane(int fd)
 {
 	struct termio temp_mode;
 
@@ -555,8 +547,8 @@ int fd;
 
 /* Set a terminal in raw mode */
 
-int tty_raw(fd)
-int fd;     /* of tty device */
+int tty_raw(int fd)
+/* of tty device */
 {
 	struct termio temp_mode;
 
@@ -598,8 +590,7 @@ int fd;     /* of tty device */
 /* Restore terminal's mode to whatever it was on the most
    recent call to the tty_getmode() function. */
 
-int tty_reset(fd)
-int fd;
+int tty_reset(int fd)
 {
 	if ( ! tty_init )
 		return(-1);
@@ -624,8 +615,7 @@ int fd;
 
 /* Set a tty to a sane mode */
 
-int tty_sane(fd)
-int fd;
+int tty_sane(int fd)
 {
 	struct sgttyb temp_mode;
 
@@ -650,8 +640,7 @@ int fd;
 
 static struct sgttyb	tty_mode;	/* save tty mode here */
 
-int tty_getmode(fd)
-int fd;
+int tty_getmode(int fd)
 {
 	if ( ! isatty(fd) )
 		return(0);
@@ -669,8 +658,8 @@ int fd;
  * (also in this file) when it's done with raw mode.
  */
 
-int tty_raw(fd)
-int	fd;		/* of terminal device */
+int tty_raw(int	fd)
+/* of terminal device */
 {
 	struct sgttyb	temp_mode;
 
@@ -692,8 +681,8 @@ int	fd;		/* of terminal device */
  * recent call to the tty_getmode() function above.
  */
 
-int tty_reset(fd)
-int	fd;		/* of terminal device */
+int tty_reset(int fd)
+/* of terminal device */
 {
 	if ( ! isatty(fd) )
 		return(0);
@@ -717,9 +706,9 @@ static struct /* winsize */ {
 		unsigned short	ws_ypixel;	/* vertical size - not used */
 	} mywinz;
 
-void pty_setwin(fd, win)
-int fd;			/* The pty file descriptor */
-int win;		/* 0 for upper, 1 for lower window */
+void pty_setwin(int fd, int win)
+/* The pty file descriptor */
+/* 0 for upper, 1 for lower window */
 {
 	if ( win == UPPER )
 		mywinz.ws_row=WU_lines;
@@ -732,9 +721,7 @@ int win;		/* 0 for upper, 1 for lower window */
 }
 
 #else
-void pty_setwin(fd, win)
-int fd;
-int win;
+void pty_setwin(int fd, int win)
 {
 	/* Bogus routine */
 }
@@ -745,10 +732,7 @@ int win;
  * Use in place of write() when fd is a stream socket.
  */
 
-int writen(fd, ptr, nbytes)
-register int	fd;
-register char	*ptr;
-register int	nbytes;
+int writen(register int fd,register char *ptr,register int nbytes)
 {
 	int	nleft, nwritten;
 
@@ -770,8 +754,7 @@ register int	nbytes;
    Returns a pointer to the environment string or NULL if malloc() fails.
  */
 
-char *myputenv(string)
-char *string;
+char *myputenv(char *string)
 {
 	extern char **environ;	/* The process environment strings */
 
@@ -807,9 +790,7 @@ char *string;
 
 /* * * * * * * Routines to parse a line into an array of tokens * * * * * * */
 
-static int istoken(c, tokens)
-char c;
-char *tokens;
+static int istoken(char c, char *tokens)
 {
 	while ( *tokens ) {
 		if ( c == *(tokens++) )
@@ -820,11 +801,7 @@ char *tokens;
 
 /* This version of tokenize is destructive to the line it parses. */
 
-void tokenize(array, size, line, tokens)
-char *array[];
-int size;
-char *line;
-char *tokens;
+void tokenize(char *array[], int size, char *line, char *tokens)
 {
 	char *head;
 	int i=0;
@@ -847,9 +824,7 @@ char *tokens;
 /* Return the pathname of the command, or NULL if it's not in our PATH */
 /* Warning: We use a static buffer that is overwritten at each invocation. */
 
-char *pathsearch(command, secure)
-char *command;
-int secure;
+char *pathsearch(char *command, int secure)
 {
 #ifndef S_IFREG
 #define S_IFREG 0100000
@@ -908,9 +883,7 @@ int secure;
 
 /* Safe version of popen() and pclose(), they reset the uid and gid. */
 
-FILE *safe_popen(command, type)
-char *command;
-char *type;
+FILE *safe_popen(char *command, char *type)
 {
 	char *argv[4];
 	int pipe_fds[2];
@@ -973,8 +946,7 @@ char *type;
 	return(fdopen(pipe_fds[rw], type));
 }
 
-int safe_pclose(pipefp)
-FILE *pipefp;
+int safe_pclose(FILE *pipefp)
 {
 	int status;
 

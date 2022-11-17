@@ -15,10 +15,10 @@
 #include "vtmouse.h"
 #include "splitvt.h"
 
-extern FILE *safe_popen();		/* From misc.c */
+extern FILE *safe_popen(char *command, char *type); /* From misc.c */
 
 #ifdef MAIN
-void event_loop()
+void event_loop(void)
 {
 	int c, event_flag;
 	struct event X_event;
@@ -92,7 +92,7 @@ static int set_title=0;
 static char *old_title=NULL;
 int terminal_input=0;		/* Is there pending terminal input? */
 
-static char *get_xtitle()
+static char *get_xtitle(void)
 {
 	char buffer[512], *title;
 	FILE *pipe;
@@ -120,16 +120,13 @@ static char *get_xtitle()
 	strcpy(title, buffer);
 	return(title);
 }
-static void set_xtitle(titlebar)
-char *titlebar;
+static void set_xtitle(char *titlebar)
 {
 	fprintf(xt_output, "\033]0;%s\07", titlebar);
 	fflush(xt_output);
 }
 
-int event_init(input, output, titlebar)
-FILE *input, *output;
-char *titlebar;
+int event_init(FILE *input, FILE *output, char *titlebar)
 {
 	char *termtype;
 
@@ -158,8 +155,7 @@ char *titlebar;
 	return(0);
 }
 
-int event_getc(X_event)
-struct event *X_event;
+int event_getc(struct event *X_event)
 {
 #ifdef REPORT_SELECTION
 	static int last_row, last_col;
@@ -280,7 +276,7 @@ struct event *X_event;
 	return(0);
 }
 
-void event_quit()
+void event_quit(void)
 {
 	if ( have_xterm ) {
 #ifdef REPORT_SELECTION

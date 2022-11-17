@@ -1,17 +1,17 @@
 
 /* Global functions exported by vt100.c */
 
-extern char *init_vt100();		/* Initialize the window */
-extern void  set_win();			/* Move the cursor to current window */
-extern int   vt_write();		/* Write a buffer to a window */
-extern char  vt_prompt();		/* Prompt the user and return a char */
-extern void  vt_info();			/* Print out an info message */
-extern char *vt_getsel();		/* Get a selection on the window */
-extern char *vt_setselbuf();		/* Set the selection buffer */
-extern char *vt_getselbuf();		/* Get the selection buffer */
-extern void  vt_redraw();		/* Repaint a window from RAM */
-extern void  vt_showscreen();		/* Show a (help) screen */
-extern void  end_vt100();		/* End the vt100 scrolling and such */
+extern char *init_vt100(int reread_tsize);		/* Initialize the window */
+extern void  set_win(int which);			/* Move the cursor to current window */
+extern int   vt_write(int win, char *data, int len, int *source);		/* Write a buffer to a window */
+extern char  vt_prompt(char *prompt);		/* Prompt the user and return a char */
+extern void  vt_info(char *info);			/* Print out an info message */
+extern char *vt_getsel(int win, char *buf, int len);		/* Get a selection on the window */
+extern char *vt_setselbuf(char *buffer);		/* Set the selection buffer */
+extern char *vt_getselbuf(void);		/* Get the selection buffer */
+extern void  vt_redraw(void);		/* Repaint a window from RAM */
+extern void  vt_showscreen(char *title, char *text[]);		/* Show a (help) screen */
+extern void  end_vt100(void);		/* End the vt100 scrolling and such */
 
 /* Handy definitions, sometimes passed to vt100.c functions */
 

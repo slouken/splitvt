@@ -4,6 +4,8 @@
 #include "video.h"
 #endif
 
+#include <stdio.h>
+
 #define REPORT_SELECTION
 
 /* Definitions for button_state bitmasks */
@@ -35,6 +37,6 @@ struct event {
    
 extern int terminal_input;	/* Set true if event_getc() can read input */
 
-extern int  event_init();
-extern int  event_getc();
-extern void event_quit();
+extern int  event_init(FILE *input, FILE *output, char *titlebar);
+extern int  event_getc(struct event *X_event);
+extern void event_quit(void);
