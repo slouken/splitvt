@@ -275,6 +275,9 @@ int *cols;
                         /* A vt10x emulation detector -->  */   ! vttest() )
                 return("Terminal type must be set to vt100");
 
+	if ( strlen(termtype) > 256 )
+		return("Terminal type too long");
+
 	/* Get extra (possibly) capabilities from termcap */
 	if ( (error=termcap_init(termtype)) != NULL )
 		return(error);
@@ -396,7 +399,11 @@ int type;
 void vt_setscroll(upper, lower)
 int upper, lower;
 {
-	printf("\033[%d;%dr", upper, lower);
+	if ( !upper && !lower ) {
+		printf("\033[r");
+	} else {
+		printf("\033[%d;%dr", upper, lower);
+	}
 }
 void vt_revscroll()
 {
@@ -414,6 +421,10 @@ int application;
 void vt_insertchar(numcols)
 {
 	printf("\033[%d@", numcols);
+}
+void vt_reset()
+{
+	printf("\033c");
 }
 void vt_update()
 {

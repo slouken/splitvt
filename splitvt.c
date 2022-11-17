@@ -5,10 +5,13 @@
   A fun utility designed to split your screen into twin shells.
 
 				-Sam Lantinga  10/5/93
+
+  An interesting note:
+  1.6.3 was released in 1995, and 1.6.4 in 2000 - 5 years between patches!
 */
 
 static char *version=
-"@(#)Splitvt 1.6.3  12/12/95  -Sam Lantinga   (slouken@cs.ucdavis.edu)\n";
+"@(#)Splitvt 1.6.4  6/3/2000  -Sam Lantinga   (slouken@devolution.com)\n";
 
 #include	<sys/types.h>
 #include	<sys/time.h>
@@ -29,7 +32,7 @@ static char *version=
    reset to the string "xterm" after splitvt quits.  Not desirable in
    some cases.. ;^)
 */
-#define X_SUPPORT	/* Comment this line if you don't want xterm support */
+#define X_SUPPORT	/* Define X_SUPPORT if you want xterm support */
 #define XTITLE		/* Define this for an xterm title bar */
 
 #ifdef NEED_SELECT_H
@@ -379,7 +382,9 @@ char *argv[];
 		if ( FD_ISSET(ttyfd, &read_mask) )
 		{
 			do {
-				if ( (buffer[0]=event_getc(&X_event)) == EOF )
+				int c;
+
+				if ( (c=event_getc(&X_event)) == EOF )
 					finish(0);
 
 				if ( X_event.happening ) {
@@ -418,8 +423,8 @@ char *argv[];
 						vt_setselbuf(selection);
 					}
 #endif
-				} else if ( buffer[0] )
-					do_input(buffer[0]);
+				} else if ( c )
+					do_input(c);
 			} while (terminal_input);
 		}
 

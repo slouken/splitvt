@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
 #endif
 
 /* I/O streams default to stdin and stdout. */
-FILE *xt_input=stdin, *xt_output=stdout;
+static FILE *xt_input, *xt_output;
 static int have_xterm=0;
 static int set_title=0;
 static char *old_title=NULL;
@@ -218,7 +218,7 @@ struct event *X_event;
 					/* first row */
 					1 + thiswin->row_offset,
 					/* last row */
-					thiswin->rows + thiswin->row_offset);
+					thiswin->rows + thiswin->row_offset+1);
 #else
 						fprintf(xt_output, 
 							"\033[1;%d;%d;%d;%dT",

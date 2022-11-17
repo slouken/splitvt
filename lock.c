@@ -88,7 +88,8 @@ char c;
 			case ENTERED1:
 			case ENTERED2:
 			case LOCKED:
-					if (cnt < BUFSIZ-1) *(nextbuf++) = c;
+					++cnt;
+					if (cnt < BUFSIZ-1) { *(nextbuf++) = c; cnt++; }
 					break;
 		}
 	}

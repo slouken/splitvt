@@ -237,6 +237,8 @@ char *argv[];
 #endif
 	fprintf(makefile, "\nclean: \n\trm -f *.o core \n");
 	fprintf(makefile, "\nclobber: clean\n\trm -f splitvt Makefile\n");
+	fprintf(makefile, "\ninstall: \n\tmv splitvt /usr/local/bin/splitvt\n");
+	fprintf(makefile, "\tmv examples/xsplitvt /usr/local/bin/xsplitvt\n");
 
 	fclose(makefile);
 	exit(0);

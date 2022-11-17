@@ -8,10 +8,10 @@ Announcing the newest version of splitvt!
 
 SECURITY ALERT!!!
 
-	splitvt versions lower than 1.6.3 are known to have a
+	splitvt versions lower than 1.6.4 are known to have a
 security hole allowing a user to gain ROOT access on some systems!
 
-	If you have a version lower than 1.6.3 _please_ remove
+	If you have a version lower than 1.6.4 _please_ remove
 the set-uid bit on your current version, and upgrade to the newer
 version as soon as possible.
 ("splitvt -version" will tell you what version you are running)
@@ -20,8 +20,8 @@ The set-uid bit is only for updating the utmp database and for
 changing ownership of its pseudo-terminals.  It is not necessary
 for splitvt's operation.
 
-The latest version is available via anonymous ftp from 
-dandelion.ceres.ca.gov in the /pub/splitvt directory.
+The latest version is available via the web at:
+	http://www.devolution.com/~slouken/projects/splitvt/
 
 
 What it is:
@@ -33,56 +33,24 @@ that while screen gives you multiple virtual screens, splitvt splits
 your screen into two fully visible windows.  You can even use 
 splitvt with screen to provide multiple split screens.  This can 
 be very handy when running over a modem, or for developing
-client-server applications.
+client-server applications or watching routine tasks as you work.
 
-What can I use it for?
-
-	Well, at this time, I am aware of several ways in which
-people are using splitvt.  Some people like to use it over the modem
-to allow them more than one window at a time, others like to use it
-in xterms because they prefer having everything on the screen at once,
-and some people are using it in conjunction with the -rcfile option 
-to automate system administration tasks.
 	If you are using splitvt in a new and unusual way,
 I'd like to hear about it! 
-Direct all comments to slouken@cs.ucdavis.edu
-
-Where can I get it?
-
-	Splitvt is available for anonymous ftp from
-dandelion.ceres.ca.gov in the /pub/Linux/splitvt directory.
-You can also get it from sunsite.unc.edu in /pub/Linux/Incoming
-now, and will hopefully to be moved to /pub/Linux/utils/terminal.
-The file is splitvt-1.6.3.tgz and it is in tarred and gzipped format.
+Direct all comments to slouken@devolution.com
 
 What's new?
 
-	Lots of stuff. :)
 Here is the list of things from the CHANGES file:
 
-	Version 1.6.3
-			Patched some security holes:
-				fixed sprintf overflow in parserc.c
-				fixed env label overflow in parserc.c
-				fixed env variable expansion overflow
-				added read access check in parserc.c
-				added chdir() access check in parserc.c
-				fixed sprintf overflow in vtmouse.c
+        Version 1.6.4
+                                Placed under the GNU General Public License
+                                Fixed scroll region reset on exit
+                                Fixed a comparison of unsigned char with EOF
+                                Patched some security holes:
+                                        fixed buffer overflow in lock.c
+                                Added "make install" target (/usr/local/bin)
 
-	Version 1.6.2
-			Fixed a bug in vt_showscreen()
-			Fixed separator redisplay in vt_prompt()
-			Added the ANNOUNCE file
-			Added a "cd" command to the startup file
-			Added -t option to change xterm title
-			xterm title is reset, if possible, at exit
-			Added xterm drag-n-drop of separator bar
-			Speeded up separator bar movement
-(broken)		Fixed cut-paste highlighting
-(broken)		Integrated cut-paste with X selection (xcb)
-			Fixed job control for FreeBSD
-					(thanks to Quang Ngo)
-			Fixed bug in cursor keys (showed up in vi)
 ----
 
 What's planned?
@@ -115,6 +83,6 @@ originally conceived by Dave Ljung and created by yours truly.
 
 Enjoy!
 
-	-Sam Lantinga		(slouken@cs.ucdavis.edu)
+	-Sam Lantinga		(slouken@devolution.com)
 
 

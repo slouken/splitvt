@@ -2,6 +2,14 @@
 Version Notes:
 
 
+	Version 1.6.4
+				Placed under the GNU General Public License
+				Fixed scroll region reset on exit
+				Fixed a comparison of unsigned char with EOF
+				Patched some security holes:
+					fixed buffer overflow in lock.c
+				Added "make install" target (/usr/local/bin)
+
 	Version 1.6.3
 				Patched some security holes:
 					fixed sprintf overflow in parserc.c
